@@ -342,15 +342,6 @@ function executeGasPost(action, payload) {
 // ============================================================================
 
 /**
- * Mengisi otomatis form login saat badge akun demo diklik
- */
-function fillLogin(username) {
-  document.getElementById("loginUsername").value = username;
-  document.getElementById("loginPassword").value = "admin123";
-  showToast(`Akun demo [${username}] diisikan otomatis. Klik Masuk Aplikasi.`, "info");
-}
-
-/**
  * Handle proses submit form login
  */
 function handleLogin(event) {

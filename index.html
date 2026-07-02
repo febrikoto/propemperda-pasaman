@@ -58,21 +58,6 @@
         <p class="mb-0 text-white-50 small">Kabupaten Pasaman, Sumatera Barat</p>
       </div>
       <div class="card-body p-3 p-sm-4">
-        <div class="alert alert-info py-2 small mb-4 border-0 bg-primary bg-opacity-10 text-primary">
-          <i class="bi bi-info-circle-fill me-1"></i> <strong>Demo Akun RBAC</strong> (Password:
-          <strong>admin123</strong>):<br>
-          <div class="mt-1 d-flex flex-wrap gap-1">
-            <span class="badge bg-primary bg-opacity-25 text-primary cursor-pointer demo-account-badge"
-              onclick="fillLogin('admin')">• admin (Super Admin)</span>
-            <span class="badge bg-success bg-opacity-25 text-success cursor-pointer demo-account-badge"
-              onclick="fillLogin('hukum_admin')">• hukum_admin (Bag. Hukum)</span>
-            <span class="badge bg-warning bg-opacity-25 text-dark cursor-pointer demo-account-badge"
-              onclick="fillLogin('dinkes_op')">• dinkes_op (OPD Dinkes)</span>
-            <span class="badge bg-info bg-opacity-25 text-dark cursor-pointer demo-account-badge"
-              onclick="fillLogin('pimpinan')">• pimpinan (Bupati/Sekda)</span>
-          </div>
-        </div>
-
         <form id="loginForm" onsubmit="handleLogin(event)">
           <div class="mb-3">
             <label class="form-label text-secondary small fw-bold">Nama Pengguna (Username)</label>
@@ -80,7 +65,7 @@
               <span class="input-group-text bg-transparent border-end-0"><i
                   class="bi bi-person text-primary"></i></span>
               <input type="text" id="loginUsername" class="form-control border-start-0 ps-0"
-                placeholder="Masukkan Username" required value="admin">
+                placeholder="Masukkan Username" required>
             </div>
           </div>
           <div class="mb-4">
