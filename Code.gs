@@ -168,6 +168,11 @@ function doPost(e) {
  * ============================================================================
  */
 function validateRole(action, role, userOpd, targetOpd, payload) {
+  // Aksi publik / logging dasar diizinkan untuk semua peran (termasuk guest / sebelum login)
+  if (action === "ping" || action === "logActivity" || action === "getUsulanList") {
+    return { valid: true, error: null };
+  }
+
   // 1. Super Admin: Akses penuh tanpa batas
   if (role === "admin") {
     return { valid: true, error: null };
