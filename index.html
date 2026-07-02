@@ -1,0 +1,1475 @@
+<!DOCTYPE html>
+<html lang="id" data-bs-theme="light">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PROPemperda Kabupaten Pasaman — Sistem Autentikasi & Pembentukan Peraturan Daerah</title>
+  <meta name="description"
+    content="Portal Pembentukan Peraturan Daerah (PROPemperda) Kabupaten Pasaman, Sumatera Barat. Sistem Autentikasi Berbasis Peran (RBAC) dan Monitoring Legislasi.">
+
+  <!-- Google Fonts (Poppins & Inter) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet">
+
+  <!-- CSS Bootstrap 5.3 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <!-- DataTables CSS & Responsive Extension -->
+  <link href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+  <link href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.bootstrap5.min.css" rel="stylesheet">
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+
+  <!-- SweetAlert2 -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <!-- jQuery -->
+  <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+  <!-- ApexCharts for Stunning Visualizations -->
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+</head>
+
+<body>
+
+  <!-- ============================================== -->
+  <!-- TOAST NOTIFICATION CONTAINER -->
+  <!-- ============================================== -->
+  <div class="toast-container-custom" id="toastContainer"></div>
+
+  <!-- BACK TO TOP BUTTON -->
+  <button id="backToTop" title="Kembali ke atas"><i class="bi bi-arrow-up fs-5"></i></button>
+
+  <!-- ============================================== -->
+  <!-- 1. HALAMAN LOGIN -->
+  <!-- ============================================== -->
+  <div id="auth-page" class="auth-container">
+    <div class="auth-card p-2 p-sm-3">
+      <div class="auth-header rounded-3">
+        <!-- Logo Resmi Kabupaten Pasaman -->
+        <img class="auth-logo"
+          src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiAfAijN9qgGagI6UrmYYKHRV8ChdQfo--W0GhjHst1QTictC8Nt3s7T_4XgM7IINfqlzC9gnYpGVFWAJ1ds-oXTReoKLZm3PJ55iMic_uC7rhEm2QzFNkOktj8CXbbydmAqnLg7OfifW1395_BiCgxJ51x86jetYdPrykZsV799GjlZ4u0vQHGhw/s953/Kabupaten%20Pasaman%20[KoleksiLogo.com].png"
+          alt="Logo Kab Pasaman"
+          onerror="this.onerror=null; this.src='https://placehold.co/100x120/0f172a/FFF?text=PASAMAN';">
+        <h4 class="mb-1 font-weight-bold">PROPemperda</h4>
+        <p class="mb-0 text-white-50 small">Kabupaten Pasaman, Sumatera Barat</p>
+      </div>
+      <div class="card-body p-3 p-sm-4">
+        <div class="alert alert-info py-2 small mb-4 border-0 bg-primary bg-opacity-10 text-primary">
+          <i class="bi bi-info-circle-fill me-1"></i> <strong>Demo Akun RBAC</strong> (Password:
+          <strong>admin123</strong>):<br>
+          <div class="mt-1 d-flex flex-wrap gap-1">
+            <span class="badge bg-primary bg-opacity-25 text-primary cursor-pointer demo-account-badge"
+              onclick="fillLogin('admin')">• admin (Super Admin)</span>
+            <span class="badge bg-success bg-opacity-25 text-success cursor-pointer demo-account-badge"
+              onclick="fillLogin('hukum_admin')">• hukum_admin (Bag. Hukum)</span>
+            <span class="badge bg-warning bg-opacity-25 text-dark cursor-pointer demo-account-badge"
+              onclick="fillLogin('dinkes_op')">• dinkes_op (OPD Dinkes)</span>
+            <span class="badge bg-info bg-opacity-25 text-dark cursor-pointer demo-account-badge"
+              onclick="fillLogin('pimpinan')">• pimpinan (Bupati/Sekda)</span>
+          </div>
+        </div>
+
+        <form id="loginForm" onsubmit="handleLogin(event)">
+          <div class="mb-3">
+            <label class="form-label text-secondary small fw-bold">Nama Pengguna (Username)</label>
+            <div class="input-group shadow-sm">
+              <span class="input-group-text bg-transparent border-end-0"><i
+                  class="bi bi-person text-primary"></i></span>
+              <input type="text" id="loginUsername" class="form-control border-start-0 ps-0"
+                placeholder="Masukkan Username" required value="admin">
+            </div>
+          </div>
+          <div class="mb-4">
+            <label class="form-label text-secondary small fw-bold">Kata Sandi (Password)</label>
+            <div class="input-group shadow-sm">
+              <span class="input-group-text bg-transparent border-end-0"><i class="bi bi-lock text-primary"></i></span>
+              <input type="password" id="loginPassword" class="form-control border-start-0 ps-0"
+                placeholder="Masukkan Kata Sandi" required value="admin123">
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary w-100 py-3 fw-bold text-uppercase shadow-sm rounded-3">
+            Masuk Aplikasi <i class="bi bi-arrow-right-short fs-5 ms-1"></i>
+          </button>
+        </form>
+      </div>
+      <div class="text-center py-3 bg-body-tertiary border-top text-muted small">
+        Bagian Hukum Sekretariat Daerah Kabupaten Pasaman &copy; 2026
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- 2. LAYOUT UTAMA SEBELAH LOGIN (RESPONSIVE) -->
+  <!-- ============================================== -->
+  <div id="main-layout" class="d-none">
+    <div id="wrapper">
+
+      <!-- SIDEBAR DESKTOP (DIMUAT HANYA >= 992px) -->
+      <nav id="sidebar" class="d-none d-lg-flex">
+        <div class="sidebar-header">
+          <img class="sidebar-logo"
+            src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiAfAijN9qgGagI6UrmYYKHRV8ChdQfo--W0GhjHst1QTictC8Nt3s7T_4XgM7IINfqlzC9gnYpGVFWAJ1ds-oXTReoKLZm3PJ55iMic_uC7rhEm2QzFNkOktj8CXbbydmAqnLg7OfifW1395_BiCgxJ51x86jetYdPrykZsV799GjlZ4u0vQHGhw/s953/Kabupaten%20Pasaman%20[KoleksiLogo.com].png"
+            alt="Logo Kab Pasaman" style="width:40px; height:auto;"
+            onerror="this.onerror=null; this.src='https://placehold.co/40x48/0f172a/FFF?text=P';">
+          <div>
+            <h6 class="text-white mb-0 fw-bold">PROPemperda</h6>
+            <small class="text-white-50" style="font-size:0.75rem;">Kab. Pasaman</small>
+          </div>
+        </div>
+
+        <div class="p-3 text-center border-bottom border-secondary border-opacity-25 bg-black bg-opacity-25">
+          <div
+            class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center mb-2 shadow-sm"
+            style="width: 48px; height: 48px; font-weight: 700; font-size: 1.25rem;">
+            <span class="userInitial">A</span>
+          </div>
+          <h6 class="text-white mb-0 fw-bold sidebarUserName">Nama User</h6>
+          <span
+            class="badge bg-primary bg-opacity-25 text-info border border-info border-opacity-25 mt-1 sidebarUserRole px-2 py-1"
+            style="font-size: 0.725rem;">Super Admin</span>
+          <div class="mt-1 small text-white-50 sidebarUserOpd" style="font-size: 0.7rem;">Semua OPD</div>
+        </div>
+
+        <ul class="sidebar-menu">
+          <li class="sidebar-section">Navigasi Utama</li>
+          <li class="menu-item active" data-target="page-dashboard">
+            <a href="javascript:void(0)" onclick="switchPage('page-dashboard')"><i class="bi bi-speedometer2"></i>
+              Dashboard</a>
+          </li>
+          <li class="menu-item" data-target="page-usulan">
+            <a href="javascript:void(0)" onclick="switchPage('page-usulan')"><i class="bi bi-file-earmark-text"></i>
+              Data Usulan</a>
+          </li>
+          <li class="menu-item link-write-access" data-target="page-tambah">
+            <a href="javascript:void(0)" onclick="switchPage('page-tambah')"><i class="bi bi-plus-circle"></i> Tambah
+              Usulan</a>
+          </li>
+          <li class="menu-item" data-target="page-monitoring">
+            <a href="javascript:void(0)" onclick="switchPage('page-monitoring')"><i class="bi bi-activity"></i>
+              Monitoring Progres</a>
+          </li>
+          <li class="menu-item" data-target="page-laporan">
+            <a href="javascript:void(0)" onclick="switchPage('page-laporan')"><i
+                class="bi bi-file-earmark-bar-graph"></i> Laporan Rekap</a>
+          </li>
+
+          <li class="sidebar-section link-master-data">Konfigurasi & Sistem</li>
+          <li class="menu-item link-master-data" data-target="page-master">
+            <a href="javascript:void(0)" onclick="switchPage('page-master')"><i class="bi bi-database"></i> Master Data
+              & Log</a>
+          </li>
+          <li class="menu-item link-super-admin" data-target="page-developer">
+            <a href="javascript:void(0)" onclick="switchPage('page-developer')" class="text-warning"><i
+                class="bi bi-terminal-fill"></i> Developer Hub (GAS)</a>
+          </li>
+
+          <li class="sidebar-section">Aksi</li>
+          <li>
+            <a href="javascript:void(0)" onclick="handleLogout()" class="text-danger"><i
+                class="bi bi-box-arrow-left"></i> Log Out</a>
+          </li>
+        </ul>
+      </nav>
+
+      <!-- SIDEBAR MOBILE (OFFCANVAS) -->
+      <div class="offcanvas offcanvas-start d-lg-none bg-dark text-white" tabindex="-1" id="sidebarOffcanvas"
+        style="width: 280px; --bs-offcanvas-bg: var(--dark-sidebar)">
+        <div class="offcanvas-header border-bottom border-secondary border-opacity-25" style="background: #020617">
+          <div class="d-flex align-items-center gap-2">
+            <img class="sidebar-logo"
+              src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiAfAijN9qgGagI6UrmYYKHRV8ChdQfo--W0GhjHst1QTictC8Nt3s7T_4XgM7IINfqlzC9gnYpGVFWAJ1ds-oXTReoKLZm3PJ55iMic_uC7rhEm2QzFNkOktj8CXbbydmAqnLg7OfifW1395_BiCgxJ51x86jetYdPrykZsV799GjlZ4u0vQHGhw/s953/Kabupaten%20Pasaman%20[KoleksiLogo.com].png"
+              alt="Logo Kab Pasaman" style="width:32px; height:auto;"
+              onerror="this.onerror=null; this.src='https://placehold.co/32x38/0f172a/FFF?text=P';">
+            <h6 class="text-white mb-0 fw-bold">PROPemperda</h6>
+          </div>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"
+            aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body p-0 d-flex flex-column">
+          <div class="p-3 text-center bg-black bg-opacity-25 border-bottom border-secondary border-opacity-10">
+            <div
+              class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center mb-2"
+              style="width: 48px; height: 48px; font-weight: 700; font-size: 1.25rem;">
+              <span class="userInitial">A</span>
+            </div>
+            <h6 class="text-white mb-0 fw-bold sidebarUserName">Nama User</h6>
+            <span
+              class="badge bg-primary bg-opacity-25 text-info border border-info border-opacity-25 mt-1 sidebarUserRole px-2 py-1"
+              style="font-size: 0.7rem;">Super Admin</span>
+            <div class="mt-1 small text-white-50 sidebarUserOpd" style="font-size: 0.7rem;">Semua OPD</div>
+          </div>
+          <ul class="sidebar-menu flex-grow-1">
+            <li class="sidebar-section">Navigasi Utama</li>
+            <li class="menu-item active" data-target="page-dashboard">
+              <a href="javascript:void(0)"
+                onclick="switchPage('page-dashboard'); bootstrap.Offcanvas.getInstance(document.getElementById('sidebarOffcanvas')).hide();"><i
+                  class="bi bi-speedometer2"></i> Dashboard</a>
+            </li>
+            <li class="menu-item" data-target="page-usulan">
+              <a href="javascript:void(0)"
+                onclick="switchPage('page-usulan'); bootstrap.Offcanvas.getInstance(document.getElementById('sidebarOffcanvas')).hide();"><i
+                  class="bi bi-file-earmark-text"></i> Data Usulan</a>
+            </li>
+            <li class="menu-item link-write-access" data-target="page-tambah">
+              <a href="javascript:void(0)"
+                onclick="switchPage('page-tambah'); bootstrap.Offcanvas.getInstance(document.getElementById('sidebarOffcanvas')).hide();"><i
+                  class="bi bi-plus-circle"></i> Tambah Usulan</a>
+            </li>
+            <li class="menu-item" data-target="page-monitoring">
+              <a href="javascript:void(0)"
+                onclick="switchPage('page-monitoring'); bootstrap.Offcanvas.getInstance(document.getElementById('sidebarOffcanvas')).hide();"><i
+                  class="bi bi-activity"></i> Monitoring Progres</a>
+            </li>
+            <li class="menu-item" data-target="page-laporan">
+              <a href="javascript:void(0)"
+                onclick="switchPage('page-laporan'); bootstrap.Offcanvas.getInstance(document.getElementById('sidebarOffcanvas')).hide();"><i
+                  class="bi bi-file-earmark-bar-graph"></i> Laporan Rekap</a>
+            </li>
+            <li class="sidebar-section link-master-data">Sistem</li>
+            <li class="menu-item link-master-data" data-target="page-master">
+              <a href="javascript:void(0)"
+                onclick="switchPage('page-master'); bootstrap.Offcanvas.getInstance(document.getElementById('sidebarOffcanvas')).hide();"><i
+                  class="bi bi-database"></i> Master Data & Log</a>
+            </li>
+            <li class="menu-item link-super-admin" data-target="page-developer">
+              <a href="javascript:void(0)"
+                onclick="switchPage('page-developer'); bootstrap.Offcanvas.getInstance(document.getElementById('sidebarOffcanvas')).hide();"
+                class="text-warning"><i class="bi bi-terminal-fill"></i> Developer Hub</a>
+            </li>
+            <li class="sidebar-section">Aksi</li>
+            <li>
+              <a href="javascript:void(0)" onclick="handleLogout()" class="text-danger"><i
+                  class="bi bi-box-arrow-left"></i> Keluar</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- CONTENT AREA -->
+      <div id="content">
+
+        <!-- NAVBAR -->
+        <nav class="navbar navbar-expand-lg navbar-custom sticky-top">
+          <div class="container-fluid p-0">
+            <button class="btn btn-outline-secondary me-2 d-lg-none" type="button" data-bs-toggle="offcanvas"
+              data-bs-target="#sidebarOffcanvas">
+              <i class="bi bi-list fs-4"></i>
+            </button>
+            <button class="btn btn-outline-secondary d-none d-lg-block me-3" id="sidebarToggle" type="button"
+              onclick="toggleSidebar()">
+              <i class="bi bi-list fs-4"></i>
+            </button>
+            <div class="d-none d-md-block">
+              <span class="text-muted small fw-medium">PROPemperda Kabupaten Pasaman — Sistem Autentikasi Berbasis Peran
+                (RBAC)</span>
+            </div>
+            <div class="ms-auto d-flex align-items-center gap-2">
+              <button
+                class="btn btn-sm btn-outline-secondary rounded-circle p-2 d-flex align-items-center justify-content-center"
+                style="width:38px; height:38px;" id="darkModeBtn" type="button" onclick="toggleDarkMode()"
+                title="Ganti Mode Tema">
+                <i class="bi bi-moon-stars fs-6" id="themeIcon"></i>
+              </button>
+              <span
+                class="badge bg-success-subtle text-success border border-success-subtle py-2 px-3 rounded-pill d-none d-sm-inline-flex align-items-center gap-1 shadow-sm">
+                <i class="bi bi-shield-lock-fill"></i> <span id="navbarRoleBadge">RBAC Secured</span>
+              </span>
+            </div>
+          </div>
+        </nav>
+
+        <!-- BREADCRUMBS -->
+        <div class="bg-body-tertiary border-bottom px-4 py-2">
+          <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0 small" id="dynamicBreadcrumb">
+              <li class="breadcrumb-item"><a href="javascript:void(0)"
+                  onclick="switchPage('page-dashboard')">Beranda</a></li>
+              <li class="breadcrumb-item active" aria-current="page">Dashboard</li>
+            </ol>
+          </nav>
+        </div>
+
+        <!-- BODY PAGES -->
+        <div class="main-body container-fluid">
+
+          <!-- ============================================== -->
+          <!-- A. DASHBOARD PAGE -->
+          <!-- ============================================== -->
+          <div id="page-dashboard" class="page-content">
+            <!-- HEADER WITH PRINT REPORT PRINT BRANDING -->
+            <div class="print-header">
+              <h3>PEMERINTAH KABUPATEN PASAMAN</h3>
+              <h4>SEKRETARIAT DAERAH - BAGIAN HUKUM</h4>
+              <p>Jl. Jenderal Sudirman No. 40, Lubuk Sikaping, Kabupaten Pasaman, Sumatera Barat</p>
+              <h5 class="mt-3">LAPORAN REKAPITULASI PROGRAM PEMBENTUKAN PERATURAN DAERAH (PROPEMPERDA)</h5>
+            </div>
+
+            <div
+              class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center mb-4 gap-2">
+              <div>
+                <h4 class="fw-bold mb-1 text-primary"><i class="bi bi-speedometer2 me-2"></i>Dasbor Portal Regulasi</h4>
+                <p class="text-muted small mb-0" id="dash-welcome">Memuat statistik dan visualisasi data daerah...</p>
+              </div>
+              <div class="d-flex gap-2 w-100 w-sm-auto">
+                <button
+                  class="btn btn-outline-primary btn-sm d-flex align-items-center justify-content-center shadow-sm flex-fill"
+                  onclick="switchPage('page-tambah')">
+                  <i class="bi bi-plus-circle me-1"></i> Usulan Baru
+                </button>
+                <button
+                  class="btn btn-primary btn-sm d-flex align-items-center justify-content-center shadow-sm flex-fill"
+                  onclick="initDashboardCharts()">
+                  <i class="bi bi-arrow-clockwise me-1"></i> Sinkronisasi
+                </button>
+              </div>
+            </div>
+
+            <!-- CARDS STATS (Dinamis Berdasarkan Peran) -->
+            <div class="row g-3 mb-4" id="dashboard-stats-row">
+              <!-- Diisi secara dinamis oleh JS -->
+            </div>
+
+            <!-- GRAPHICS ROW -->
+            <div class="row g-4">
+              <div class="col-12 col-xl-6">
+                <div class="custom-card h-100">
+                  <div class="card-header"><i class="bi bi-pie-chart-fill me-2 text-primary"></i>Proporsi Usulan
+                    Berdasarkan Jenis Regulasi</div>
+                  <div class="card-body">
+                    <div id="chart-jenis" style="width: 100%; min-height: 320px;"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-12 col-xl-6">
+                <div class="custom-card h-100">
+                  <div class="card-header"><i class="bi bi-bar-chart-line-fill me-2 text-success"></i>Status
+                    Perkembangan Progres Pembentukan</div>
+                  <div class="card-body">
+                    <div id="chart-status" style="width: 100%; min-height: 320px;"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-12" id="chart-opd-container">
+                <div class="custom-card">
+                  <div class="card-header"><i class="bi bi-building me-2 text-info"></i>Usulan Terdaftar Per Perangkat
+                    Daerah (OPD Pemrakarsa)</div>
+                  <div class="card-body">
+                    <div id="chart-opd" style="width: 100%; min-height: 360px;"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ============================================== -->
+          <!-- B. DATA USULAN PAGE (RESPONSIVE DATATABLES) -->
+          <!-- ============================================== -->
+          <div id="page-usulan" class="page-content d-none">
+            <div
+              class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center mb-4 gap-2">
+              <div>
+                <h4 class="fw-bold mb-1 text-primary"><i class="bi bi-file-earmark-text me-2"></i>Daftar Dokumen Usulan
+                  Regulasi</h4>
+                <p class="text-muted small mb-0">Manajemen perancangan regulasi daerah Kabupaten Pasaman</p>
+              </div>
+              <button
+                class="btn btn-primary d-flex align-items-center shadow-sm w-100 w-sm-auto justify-content-center link-write-access"
+                onclick="switchPage('page-tambah')">
+                <i class="bi bi-plus-lg me-2"></i> Daftarkan Usulan Baru
+              </button>
+            </div>
+
+            <!-- FILTERS CARD -->
+            <div class="custom-card mb-4">
+              <div class="card-header bg-light-subtle py-3"><i class="bi bi-funnel-fill me-1 text-primary"></i>
+                Penyaringan Data Usulan</div>
+              <div class="card-body">
+                <div class="row g-3">
+                  <div class="col-12 col-sm-6 col-md-3">
+                    <label class="form-label small fw-bold text-secondary">Perangkat Daerah (OPD)</label>
+                    <select id="filter-opd" class="form-select" onchange="applyFilters()">
+                      <option value="">Semua OPD</option>
+                    </select>
+                  </div>
+                  <div class="col-12 col-sm-6 col-md-3">
+                    <label class="form-label small fw-bold text-secondary">Status Tahapan Regulasi</label>
+                    <select id="filter-status" class="form-select" onchange="applyFilters()">
+                      <option value="">Semua Status</option>
+                      <option value="Draft">Draft</option>
+                      <option value="Diverifikasi">Diverifikasi</option>
+                      <option value="Perlu Perbaikan">Perlu Perbaikan</option>
+                      <option value="Harmonisasi">Harmonisasi</option>
+                      <option value="Pembahasan">Pembahasan</option>
+                      <option value="Persetujuan">Persetujuan</option>
+                      <option value="Penetapan">Penetapan</option>
+                      <option value="Selesai">Selesai</option>
+                    </select>
+                  </div>
+                  <div class="col-12 col-sm-6 col-md-3">
+                    <label class="form-label small fw-bold text-secondary">Jenis Regulasi</label>
+                    <select id="filter-jenis" class="form-select" onchange="applyFilters()">
+                      <option value="">Semua Jenis</option>
+                      <option value="Peraturan Daerah (Perda)">Peraturan Daerah (Perda)</option>
+                      <option value="Peraturan Bupati (Perkada)">Peraturan Bupati (Perkada)</option>
+                    </select>
+                  </div>
+                  <div class="col-12 col-sm-6 col-md-3">
+                    <label class="form-label small fw-bold text-secondary">Status Delegasi</label>
+                    <select id="filter-delegasi" class="form-select" onchange="applyFilters()">
+                      <option value="">Semua Delegasi</option>
+                      <option value="YA">Delegasi Langsung</option>
+                      <option value="TIDAK">Bukan Delegasi</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- DATATABLE CARD -->
+            <div class="custom-card">
+              <div class="card-body">
+                <div id="table-skeleton-loader" class="d-none">
+                  <div class="skeleton-placeholder mb-2" style="height: 45px; width: 100%;"></div>
+                  <div class="skeleton-placeholder mb-2" style="height: 38px; width: 100%;"></div>
+                  <div class="skeleton-placeholder mb-2" style="height: 38px; width: 100%;"></div>
+                  <div class="skeleton-placeholder mb-2" style="height: 38px; width: 100%;"></div>
+                </div>
+                <div class="table-responsive" id="table-real-container">
+                  <table id="usulanTable" class="table table-hover table-striped align-middle" style="width:100%">
+                    <thead class="table-dark">
+                      <tr>
+                        <th width="5%">No</th>
+                        <th width="20%">OPD Pemrakarsa</th>
+                        <th width="32%">Judul Rancangan Regulasi</th>
+                        <th width="13%">Jenis</th>
+                        <th width="15%">PIC & Tanggal</th>
+                        <th width="10%">Status</th>
+                        <th width="5%" class="text-center">Aksi</th>
+                      </tr>
+                    </thead>
+                    <tbody id="usulanTableBody">
+                      <!-- Diisi dinamis -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ============================================== -->
+          <!-- C. FORM TAMBAH & EDIT USULAN -->
+          <!-- ============================================== -->
+          <div id="page-tambah" class="page-content d-none">
+            <div
+              class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center mb-4 gap-2">
+              <div>
+                <h4 class="fw-bold mb-1 text-primary" id="form-title"><i class="bi bi-plus-circle me-2"></i>Ajukan
+                  Usulan Baru</h4>
+                <p class="text-muted small mb-0">Isi seluruh parameter pembentukan peraturan daerah dengan valid dan
+                  lengkap</p>
+              </div>
+              <button class="btn btn-outline-secondary w-100 w-sm-auto justify-content-center d-flex align-items-center"
+                onclick="switchPage('page-usulan')">
+                <i class="bi bi-arrow-left me-2"></i> Kembali ke Daftar
+              </button>
+            </div>
+
+            <div class="custom-card">
+              <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-pencil-square me-2"></i>Formulir Kelengkapan Usulan Teknis</span>
+                <span class="badge bg-white text-primary small">Mandatori (*)</span>
+              </div>
+              <div class="card-body">
+                <form id="usulanForm" onsubmit="handleSaveUsulan(event)">
+                  <input type="hidden" id="edit-id">
+
+                  <div class="row g-3">
+                    <div class="col-12 col-md-6">
+                      <label class="form-label fw-bold small">Nama Perangkat Daerah Pemrakarsa <span
+                          class="text-danger">*</span></label>
+                      <select id="inp-opd" class="form-select" required></select>
+                    </div>
+                    <div class="col-12 col-md-6">
+                      <label class="form-label fw-bold small">Nama Kontak Teknis (PIC) <span
+                          class="text-danger">*</span></label>
+                      <input type="text" id="inp-pic" class="form-control" placeholder="Nama Lengkap Penanggung Jawab"
+                        required>
+                    </div>
+                    <div class="col-12 col-md-4">
+                      <label class="form-label fw-bold small">Nomor WhatsApp PIC <span
+                          class="text-danger">*</span></label>
+                      <input type="text" id="inp-wa" class="form-control" placeholder="Contoh: 0812345678" required>
+                    </div>
+                    <div class="col-12 col-md-4">
+                      <label class="form-label fw-bold small">Jenis Regulasi yang Diusulkan <span
+                          class="text-danger">*</span></label>
+                      <select id="inp-jenis" class="form-select" required>
+                        <option value="Peraturan Daerah (Perda)">Peraturan Daerah (Perda)</option>
+                        <option value="Peraturan Bupati (Perkada)">Peraturan Bupati (Perkada)</option>
+                      </select>
+                    </div>
+                    <div class="col-12 col-md-4">
+                      <label class="form-label fw-bold small">Status Sifat Regulasi <span
+                          class="text-danger">*</span></label>
+                      <select id="inp-status" class="form-select" required>
+                        <option value="Baru">Baru</option>
+                        <option value="Perubahan">Perubahan</option>
+                        <option value="Pencabutan">Pencabutan</option>
+                      </select>
+                    </div>
+                    <div class="col-12">
+                      <label class="form-label fw-bold small">Jika Perubahan/Pencabutan, Sebutkan Nomor dan Judul
+                        Peraturan Lama</label>
+                      <input type="text" id="inp-peraturan-lama" class="form-control" value="N/A"
+                        placeholder="Contoh: Perda Nomor 5 Tahun 2018 tentang Retribusi">
+                    </div>
+                    <div class="col-12">
+                      <label class="form-label fw-bold small">Judul Rancangan Peraturan yang Diusulkan <span
+                          class="text-danger">*</span></label>
+                      <textarea id="inp-judul" class="form-control" rows="2"
+                        placeholder="Tuliskan Judul Lengkap Regulasi yang diusulkan..." required
+                        style="min-height: 70px;"></textarea>
+                    </div>
+                    <div class="col-12 col-md-6">
+                      <label class="form-label fw-bold small">Latar Belakang & Urgensi Singkat Pembentukan <span
+                          class="text-danger">*</span></label>
+                      <textarea id="inp-urgensi" class="form-control" rows="4"
+                        placeholder="Sebutkan urgensi sosiologis, filosofis, dan yuridis secara singkat..."
+                        required></textarea>
+                    </div>
+                    <div class="col-12 col-md-6">
+                      <label class="form-label fw-bold small">Ruang Lingkup Pengaturan <span
+                          class="text-danger">*</span></label>
+                      <textarea id="inp-ruang-lingkup" class="form-control" rows="4"
+                        placeholder="Sebutkan pokok-pokok bab substansi materi yang akan diatur..." required></textarea>
+                    </div>
+                    <div class="col-12 col-md-6">
+                      <label class="form-label fw-bold small">Apakah regulasi ini merupakan DELEGASI LANGSUNG dari
+                        peraturan di atasnya? <span class="text-danger">*</span></label>
+                      <select id="inp-is-delegasi" class="form-select" onchange="toggleDelegasi()" required>
+                        <option value="TIDAK">TIDAK</option>
+                        <option value="YA">YA</option>
+                      </select>
+                    </div>
+                    <div class="col-12 col-md-6" id="div-delegasi-text" style="display:none;">
+                      <label class="form-label fw-bold small">Nama Peraturan Di Atasnya dan Pasal/Ayat yang
+                        Mendelegasikan <span class="text-danger">*</span></label>
+                      <input type="text" id="inp-delegasi-text" class="form-control" value="N/A"
+                        placeholder="Contoh: Pasal 45 Undang-Undang No 23 Tahun 2014">
+                    </div>
+                    <div class="col-12">
+                      <label class="form-label fw-bold small">Dasar hukum lainnya yang terkait <span
+                          class="text-danger">*</span></label>
+                      <textarea id="inp-dasar-hukum" class="form-control" rows="2"
+                        placeholder="Undang-undang, regulasi kementerian, atau Perda pendukung lainnya..."
+                        required></textarea>
+                    </div>
+                    <div class="col-12 col-md-6">
+                      <label class="form-label fw-bold small">Target Tanggal Penyelesaian Rancangan Awal <span
+                          class="text-danger">*</span></label>
+                      <input type="date" id="inp-target-selesai" class="form-control" required>
+                    </div>
+                    <div class="col-12 col-md-6">
+                      <label class="form-label fw-bold small">Apakah telah dilakukan pembahasan awal atau koordinasi
+                        dengan pemangku kepentingan terkait? <span class="text-danger">*</span></label>
+                      <select id="inp-pembahasan-awal" class="form-select" required>
+                        <option value="Belum">Belum</option>
+                        <option value="Sudah">Sudah</option>
+                      </select>
+                    </div>
+                    <div class="col-12">
+                      <label class="form-label fw-bold small">Upload File Kajian / Naskah Akademik (PDF/DOCX - Maksimal
+                        10 MB) <span class="text-danger">*</span></label>
+                      <div class="dropzone-container" id="dropzone"
+                        onclick="document.getElementById('inp-file').click()">
+                        <i class="bi bi-cloud-arrow-up-fill dropzone-icon"></i>
+                        <h6 class="mb-1 fw-bold">Pilih berkas dokumen Anda atau seret ke sini</h6>
+                        <span class="text-muted small">Format PDF/DOCX (Maksimal 10 MB)</span>
+                        <input type="file" id="inp-file" class="form-control d-none" accept=".pdf,.docx"
+                          onchange="handleFileSelect(event)">
+                        <div id="file-chosen-info"
+                          class="mt-3 fw-bold text-success d-none p-2 rounded bg-success bg-opacity-10 d-inline-block">
+                        </div>
+                      </div>
+                      <div class="progress mt-3 d-none rounded-pill" id="upload-progress-container"
+                        style="height: 12px;">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary"
+                          id="upload-progress-bar" role="progressbar" style="width: 0%;"></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="mt-4 pt-3 border-top d-flex flex-column flex-sm-row justify-content-end gap-2">
+                    <button type="button" class="btn btn-outline-secondary w-100 w-sm-auto order-2 order-sm-1 px-4"
+                      onclick="switchPage('page-usulan')">Batal</button>
+                    <button type="submit" class="btn btn-primary w-100 w-sm-auto order-1 order-sm-2 px-4 shadow-sm"
+                      id="btnSaveSubmit">Simpan Usulan <i class="bi bi-send ms-1"></i></button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <!-- ============================================== -->
+          <!-- D. DETAIL DATA PAGE -->
+          <!-- ============================================== -->
+          <div id="page-detail" class="page-content d-none">
+            <div
+              class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center mb-4 gap-2">
+              <div>
+                <h4 class="fw-bold mb-1 text-primary"><i class="bi bi-info-square me-2"></i>Detail Dokumen Usulan
+                  Regulasi</h4>
+                <p class="text-muted small mb-0">Rincian parameter teknis dan riwayat rancangan regulasi daerah</p>
+              </div>
+              <div class="d-flex gap-2 w-100 w-sm-auto">
+                <button
+                  class="btn btn-outline-secondary w-100 w-sm-auto justify-content-center d-flex align-items-center"
+                  onclick="switchPage('page-usulan')">
+                  <i class="bi bi-arrow-left me-2"></i> Kembali
+                </button>
+                <button
+                  class="btn btn-primary w-100 w-sm-auto justify-content-center d-flex align-items-center link-write-access"
+                  id="dtl-btn-edit" onclick="">
+                  <i class="bi bi-pencil me-1"></i> Edit Data
+                </button>
+              </div>
+            </div>
+
+            <div class="row g-4">
+              <div class="col-12 col-xl-8">
+                <div class="custom-card mb-4">
+                  <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <span><i class="bi bi-file-text-fill me-2"></i>Identitas Rancangan Regulasi</span>
+                    <span id="dtl-timestamp" class="badge bg-white text-dark small">Timestamp</span>
+                  </div>
+                  <div class="card-body">
+                    <h5 class="fw-bold mb-3 text-primary" id="dtl-judul">Judul Regulasi</h5>
+                    <p id="dtl-urgensi"
+                      class="text-muted border-start border-4 border-primary ps-3 py-2 mb-4 bg-body-tertiary rounded-end"
+                      style="text-align: justify; line-height: 1.6;">Latar Belakang & Urgensi...</p>
+
+                    <h6 class="fw-bold text-primary mb-2"><i class="bi bi-list-check me-1"></i> Ruang Lingkup Pengaturan
+                    </h6>
+                    <p id="dtl-ruang-lingkup" class="mb-4 text-secondary" style="line-height: 1.6;">Ruang lingkup...</p>
+
+                    <h6 class="fw-bold text-primary mb-2"><i class="bi bi-book me-1"></i> Dasar Hukum Terkait</h6>
+                    <p id="dtl-dasar-hukum" class="mb-4 text-secondary" style="line-height: 1.6;">Dasar hukum...</p>
+
+                    <div class="row bg-body-tertiary rounded-3 p-3 g-3 border">
+                      <div class="col-12 col-sm-4">
+                        <span class="small text-muted d-block">Delegasi Langsung?</span>
+                        <strong id="dtl-is-delegasi" class="text-primary">TIDAK</strong>
+                      </div>
+                      <div class="col-12 col-sm-8">
+                        <span class="small text-muted d-block">Keterangan Delegasi</span>
+                        <strong id="dtl-delegasi-text">N/A</strong>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- RIWAYAT ALUR DI DETAIL -->
+                <div class="custom-card">
+                  <div class="card-header bg-light-subtle"><i class="bi bi-clock-history me-2 text-primary"></i>Riwayat
+                    Proses Pembentukan</div>
+                  <div class="card-body">
+                    <ul class="timeline-list" id="dtl-timeline">
+                      <!-- Diisi dinamis -->
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-12 col-xl-4">
+                <div class="custom-card mb-4">
+                  <div class="card-header bg-light-subtle"><i
+                      class="bi bi-person-badge me-2 text-primary"></i>Pemrakarsa & PIC</div>
+                  <div class="card-body">
+                    <div class="mb-3">
+                      <label class="text-muted small d-block">Instansi Pengusul (OPD)</label>
+                      <strong id="dtl-opd" class="fs-6 text-primary">Nama OPD</strong>
+                    </div>
+                    <div class="mb-3">
+                      <label class="text-muted small d-block">Penanggung Jawab (PIC)</label>
+                      <strong id="dtl-pic">Nama PIC</strong>
+                    </div>
+                    <div class="mb-1">
+                      <label class="text-muted small d-block">Nomor WhatsApp</label>
+                      <a href="#" id="dtl-wa-link" target="_blank"
+                        class="btn btn-sm btn-success d-inline-flex align-items-center mt-1 shadow-sm rounded-pill px-3 py-2">
+                        <i class="bi bi-whatsapp me-2 fs-6"></i> <span id="dtl-wa">08123...</span>
+                      </a>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="custom-card mb-4">
+                  <div class="card-header bg-light-subtle"><i class="bi bi-sliders me-2 text-primary"></i>Status &
+                    Target</div>
+                  <div class="card-body">
+                    <div class="mb-3">
+                      <label class="text-muted small d-block">Jenis Regulasi</label>
+                      <span id="dtl-jenis"
+                        class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 py-2 px-3 mt-1">Perda
+                        / Perkada</span>
+                    </div>
+                    <div class="mb-3">
+                      <label class="text-muted small d-block">Sifat Regulasi</label>
+                      <span id="dtl-sifat"
+                        class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 py-2 px-3 mt-1">Baru
+                        / Perubahan</span>
+                    </div>
+                    <div class="mb-3" id="dtl-lama-section">
+                      <label class="text-muted small d-block">Peraturan Lama yang Diubah/Dicabut</label>
+                      <span class="small fw-medium text-dark" id="dtl-lama">N/A</span>
+                    </div>
+                    <div class="mb-3">
+                      <label class="text-muted small d-block">Target Penyelesaian</label>
+                      <strong id="dtl-target" class="text-danger">Target Tanggal</strong>
+                    </div>
+                    <div class="mb-1">
+                      <label class="text-muted small d-block mb-1">Tahapan Legislasi Saat Ini</label>
+                      <span id="dtl-status" class="badge-status status-draft">Draft</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="custom-card">
+                  <div class="card-header bg-light-subtle"><i
+                      class="bi bi-file-earmark-arrow-down-fill me-2 text-danger"></i>Kajian Lampiran</div>
+                  <div class="card-body text-center py-4">
+                    <i class="bi bi-file-earmark-pdf-fill text-danger display-3 mb-3"></i>
+                    <h6 class="mb-1 text-truncate fw-bold" id="dtl-filename">Kajian_Teknis.pdf</h6>
+                    <p class="text-muted small mb-3">Tersimpan di Penyimpanan Cloud (GAS Drive)</p>
+                    <a id="dtl-file-link" href="#" target="_blank"
+                      class="btn btn-outline-primary btn-sm w-100 rounded-pill py-2 fw-bold shadow-sm"
+                      onclick="simulateDownload(event)">
+                      <i class="bi bi-download me-1"></i> Buka / Unduh Lampiran
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ============================================== -->
+          <!-- E. MONITORING PROGRESS PAGE (STEPPER PROGRESSIVE) -->
+          <!-- ============================================== -->
+          <div id="page-monitoring" class="page-content d-none">
+            <div
+              class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center mb-4 gap-2">
+              <div>
+                <h4 class="fw-bold mb-1 text-primary"><i class="bi bi-activity me-2"></i>Monitoring Proses Legislasi
+                  Usulan</h4>
+                <p class="text-muted small mb-0">Pemantauan progres alur legislasi 8 tahapan regulasi daerah</p>
+              </div>
+              <span class="badge bg-info-subtle text-info border border-info-subtle py-2 px-3 rounded-pill small">
+                <i class="bi bi-clock-history me-1"></i> Pemantauan Real-time
+              </span>
+            </div>
+
+            <!-- TAMPILAN MONITORING STEPPER -->
+            <div class="custom-card">
+              <div class="card-header bg-light-subtle py-3"><i class="bi bi-search me-2 text-primary"></i> Pilih Usulan
+                Regulasi Untuk Dimonitor</div>
+              <div class="card-body">
+                <div class="mb-4">
+                  <select id="monitoring-selector"
+                    class="form-select form-select-lg shadow-sm fw-medium border-primary border-opacity-50"
+                    onchange="handleMonitoringSelect()"></select>
+                </div>
+
+                <!-- STEPPER ALUR PROSES (Scrollable di layar kecil) -->
+                <div class="stepper-wrapper">
+                  <div class="stepper">
+                    <div class="stepper-progress" id="stepper-bar" style="width: 0%;"></div>
+                    <div class="step-item" id="step-1" onclick="previewStepInfo(1)">
+                      <div class="step-icon">1</div>
+                      <div class="step-text">Draft</div>
+                    </div>
+                    <div class="step-item" id="step-2" onclick="previewStepInfo(2)">
+                      <div class="step-icon">2</div>
+                      <div class="step-text">Verifikasi</div>
+                    </div>
+                    <div class="step-item" id="step-3" onclick="previewStepInfo(3)">
+                      <div class="step-icon">3</div>
+                      <div class="step-text">Perlu Perbaikan</div>
+                    </div>
+                    <div class="step-item" id="step-4" onclick="previewStepInfo(4)">
+                      <div class="step-icon">4</div>
+                      <div class="step-text">Harmonisasi</div>
+                    </div>
+                    <div class="step-item" id="step-5" onclick="previewStepInfo(5)">
+                      <div class="step-icon">5</div>
+                      <div class="step-text">Pembahasan</div>
+                    </div>
+                    <div class="step-item" id="step-6" onclick="previewStepInfo(6)">
+                      <div class="step-icon">6</div>
+                      <div class="step-text">Persetujuan</div>
+                    </div>
+                    <div class="step-item" id="step-7" onclick="previewStepInfo(7)">
+                      <div class="step-icon">7</div>
+                      <div class="step-text">Penetapan</div>
+                    </div>
+                    <div class="step-item" id="step-8" onclick="previewStepInfo(8)">
+                      <div class="step-icon">8</div>
+                      <div class="step-text">Selesai</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="bg-body-tertiary rounded-4 p-4 border mt-3 shadow-sm">
+                  <div class="row align-items-center g-4">
+                    <div class="col-12 col-md-8 text-start">
+                      <div class="d-flex align-items-center gap-2 mb-2">
+                        <span class="badge bg-primary px-3 py-1" id="mon-opd">OPD Pengusul</span>
+                        <span id="mon-status-badge" class="badge-status status-draft">Draft</span>
+                      </div>
+                      <h5 class="fw-bold text-primary mb-2" id="mon-judul">Pilih Regulasi Di Atas</h5>
+                      <p class="mb-0 text-muted small" id="mon-desc">Silakan pilih rancangan regulasi pada dropdown di
+                        atas untuk melihat keterangan progres teknis dan riwayat tahapan.</p>
+
+                      <!-- TABEL RIWAYAT MONITORING -->
+                      <div class="mt-4 pt-3 border-top border-secondary border-opacity-10">
+                        <h6 class="fw-bold text-primary mb-3 d-flex align-items-center justify-content-between">
+                          <span><i class="bi bi-clock-history me-2"></i>Catatan Riwayat Alur Proses</span>
+                          <span class="badge bg-secondary small fw-normal" id="mon-history-count">0 Aktivitas</span>
+                        </h6>
+                        <div class="border rounded-3 p-3 bg-surface shadow-sm"
+                          style="max-height: 220px; overflow-y: auto;" id="mon-history-list">
+                          <span class="text-muted small">Belum ada catatan aktivitas.</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div
+                      class="col-12 col-md-4 text-center text-md-end border-start-md border-top border-top-md-0 pt-4 pt-md-0 ps-md-4">
+                      <div class="d-flex flex-column align-items-center align-items-md-end">
+                        <div class="display-4 fw-bold text-primary mb-1" id="mon-percent">0%</div>
+                        <span class="text-muted small fw-medium text-uppercase letter-spacing-1">Progres
+                          Pembentukan</span>
+                        <div class="progress w-100 my-3 rounded-pill shadow-sm" style="height: 10px; max-width: 200px;">
+                          <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary"
+                            id="mon-percent-bar" role="progressbar" style="width: 0%"></div>
+                        </div>
+                      </div>
+
+                      <!-- AKSI ADMIN BAGIAN HUKUM (RBAC CONTROLLED) -->
+                      <div class="mt-4 pt-2 border-top border-secondary border-opacity-10 link-master-data"
+                        id="sec-hukum-action">
+                        <label class="small text-secondary fw-bold d-block mb-2 text-start text-md-end"><i
+                            class="bi bi-shield-check text-primary me-1"></i> Aksi Verifikator / Bag. Hukum:</label>
+                        <button
+                          class="btn btn-primary btn-sm w-100 py-2.5 fw-bold shadow-sm mb-2 d-flex align-items-center justify-content-center"
+                          onclick="openUpdateStatusModal()">
+                          <i class="bi bi-arrow-up-circle me-2"></i> Update Status / Tahapan
+                        </button>
+                        <button
+                          class="btn btn-outline-danger btn-sm w-100 py-2 fw-medium d-flex align-items-center justify-content-center"
+                          onclick="quickRejectUsulan()">
+                          <i class="bi bi-arrow-return-left me-2"></i> Kembalikan untuk Perbaikan
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+          <!-- ============================================== -->
+          <!-- F. LAPORAN REKAP PAGE -->
+          <!-- ============================================== -->
+          <div id="page-laporan" class="page-content d-none">
+            <div
+              class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center mb-4 gap-2">
+              <div>
+                <h4 class="fw-bold mb-1 text-primary"><i class="bi bi-file-earmark-bar-graph me-2"></i>Laporan
+                  Rekapitulasi Regulasi</h4>
+                <p class="text-muted small mb-0">Cetak dan ekspor rekapitulasi data PROPemperda Kabupaten Pasaman</p>
+              </div>
+              <div class="d-flex flex-wrap gap-2 w-100 w-sm-auto">
+                <button class="btn btn-outline-secondary btn-sm d-flex align-items-center justify-content-center"
+                  onclick="exportToCSV()">
+                  <i class="bi bi-file-earmark-spreadsheet me-1"></i> Ekspor CSV / Excel
+                </button>
+                <button class="btn btn-primary btn-sm d-flex align-items-center justify-content-center shadow-sm"
+                  onclick="printReport()">
+                  <i class="bi bi-printer me-1"></i> Cetak / Simpan PDF
+                </button>
+              </div>
+            </div>
+
+            <!-- FILTER LAPORAN -->
+            <div class="custom-card mb-4">
+              <div class="card-header bg-light-subtle py-3"><i class="bi bi-sliders me-2 text-primary"></i> Filter
+                Kriteria Laporan</div>
+              <div class="card-body">
+                <div class="row g-3">
+                  <div class="col-12 col-md-4">
+                    <label class="form-label small fw-bold text-secondary">Filter OPD Pengusul</label>
+                    <select id="lap-filter-opd" class="form-select" onchange="renderLaporanTable()">
+                      <option value="">Semua Perangkat Daerah</option>
+                    </select>
+                  </div>
+                  <div class="col-12 col-md-4">
+                    <label class="form-label small fw-bold text-secondary">Filter Status Tahapan</label>
+                    <select id="lap-filter-status" class="form-select" onchange="renderLaporanTable()">
+                      <option value="">Semua Status</option>
+                      <option value="Draft">Draft</option>
+                      <option value="Diverifikasi">Diverifikasi</option>
+                      <option value="Perlu Perbaikan">Perlu Perbaikan</option>
+                      <option value="Harmonisasi">Harmonisasi</option>
+                      <option value="Pembahasan">Pembahasan</option>
+                      <option value="Persetujuan">Persetujuan</option>
+                      <option value="Penetapan">Penetapan</option>
+                      <option value="Selesai">Selesai</option>
+                    </select>
+                  </div>
+                  <div class="col-12 col-md-4">
+                    <label class="form-label small fw-bold text-secondary">Filter Jenis Peraturan</label>
+                    <select id="lap-filter-jenis" class="form-select" onchange="renderLaporanTable()">
+                      <option value="">Semua Jenis Peraturan</option>
+                      <option value="Peraturan Daerah (Perda)">Peraturan Daerah (Perda)</option>
+                      <option value="Peraturan Bupati (Perkada)">Peraturan Bupati (Perkada)</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- TABEL LAPORAN REKAP -->
+            <div class="custom-card">
+              <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-table me-2 text-primary"></i>Hasil Rekapitulasi Data Regulasi</span>
+                <span class="badge bg-primary rounded-pill px-3 py-1" id="lap-total-count">0 Data</span>
+              </div>
+              <div class="card-body">
+                <div class="table-responsive">
+                  <table class="table table-bordered table-striped align-middle" id="table-laporan-rekap">
+                    <thead class="table-dark text-center">
+                      <tr>
+                        <th width="5%">No</th>
+                        <th width="20%">OPD Pemrakarsa</th>
+                        <th width="35%">Judul Rancangan Peraturan</th>
+                        <th width="15%">Jenis & Sifat</th>
+                        <th width="12%">Target Selesai</th>
+                        <th width="13%">Status Terkini</th>
+                      </tr>
+                    </thead>
+                    <tbody id="lap-table-body">
+                      <!-- Diisi dinamis -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ============================================== -->
+          <!-- G. MASTER DATA & LOG PAGE -->
+          <!-- ============================================== -->
+          <div id="page-master" class="page-content d-none">
+            <div
+              class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center mb-4 gap-2">
+              <div>
+                <h4 class="fw-bold mb-1 text-primary"><i class="bi bi-database me-2"></i>Master Data & Konfigurasi
+                  Sistem</h4>
+                <p class="text-muted small mb-0">Manajemen Perangkat Daerah, Hak Akses Pengguna, dan Audit Log</p>
+              </div>
+              <span class="badge bg-warning text-dark px-3 py-2 rounded-pill small">
+                <i class="bi bi-exclamation-triangle-fill me-1"></i> Khusus Super Admin & Bag. Hukum
+              </span>
+            </div>
+
+            <!-- TABS NAVIGATION -->
+            <ul class="nav nav-pills mb-4 gap-2 bg-body-tertiary p-2 rounded-4 border" id="masterTabs" role="tablist">
+              <li class="nav-item" role="presentation">
+                <button class="nav-link active rounded-pill fw-bold px-4" id="tab-opd-btn" data-bs-toggle="tab"
+                  data-bs-target="#tab-opd" type="button" role="tab">
+                  <i class="bi bi-building me-2"></i>Master OPD
+                </button>
+              </li>
+              <li class="nav-item link-super-admin" role="presentation">
+                <button class="nav-link rounded-pill fw-bold px-4" id="tab-user-btn" data-bs-toggle="tab"
+                  data-bs-target="#tab-user" type="button" role="tab">
+                  <i class="bi bi-people me-2"></i>Manajemen Pengguna (RBAC)
+                </button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button class="nav-link rounded-pill fw-bold px-4" id="tab-log-btn" data-bs-toggle="tab"
+                  data-bs-target="#tab-log" type="button" role="tab">
+                  <i class="bi bi-shield-check me-2"></i>Audit Log Sistem
+                </button>
+              </li>
+              <li class="nav-item link-super-admin" role="presentation">
+                <button class="nav-link rounded-pill fw-bold px-4" id="tab-trash-btn" data-bs-toggle="tab"
+                  data-bs-target="#tab-trash" type="button" role="tab">
+                  <i class="bi bi-trash3 me-2"></i>Trash & Restore
+                </button>
+              </li>
+            </ul>
+
+            <!-- TABS CONTENT -->
+            <div class="tab-content" id="masterTabsContent">
+              <!-- TAB 1: MASTER OPD -->
+              <div class="tab-pane fade show active" id="tab-opd" role="tabpanel">
+                <div class="custom-card">
+                  <div class="card-header d-flex justify-content-between align-items-center">
+                    <span><i class="bi bi-building me-2 text-primary"></i>Daftar Perangkat Daerah Kabupaten
+                      Pasaman</span>
+                    <button class="btn btn-primary btn-sm rounded-pill px-3 shadow-sm" onclick="openAddOpdModal()">
+                      <i class="bi bi-plus-lg me-1"></i> Tambah OPD
+                    </button>
+                  </div>
+                  <div class="card-body">
+                    <div class="table-responsive">
+                      <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                          <tr>
+                            <th width="5%">No</th>
+                            <th width="20%">Kode OPD</th>
+                            <th width="55%">Nama Perangkat Daerah</th>
+                            <th width="20%" class="text-center">Aksi</th>
+                          </tr>
+                        </thead>
+                        <tbody id="master-opd-body">
+                          <!-- Diisi dinamis -->
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- TAB 2: MANAJEMEN PENGGUNA -->
+              <div class="tab-pane fade" id="tab-user" role="tabpanel">
+                <div class="custom-card">
+                  <div class="card-header d-flex justify-content-between align-items-center">
+                    <span><i class="bi bi-people me-2 text-primary"></i>Manajemen Akun & Role-Based Access
+                      Control</span>
+                    <button class="btn btn-primary btn-sm rounded-pill px-3 shadow-sm" onclick="openAddUserModal()">
+                      <i class="bi bi-person-plus me-1"></i> Tambah Pengguna
+                    </button>
+                  </div>
+                  <div class="card-body">
+                    <div class="alert alert-secondary py-2 small mb-3">
+                      <i class="bi bi-info-circle me-1"></i> Akun default sistem tidak dapat dihapus. Password default
+                      untuk akun demo adalah <strong>admin123</strong>.
+                    </div>
+                    <div class="table-responsive">
+                      <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                          <tr>
+                            <th width="5%">No</th>
+                            <th width="20%">Username</th>
+                            <th width="25%">Nama Lengkap</th>
+                            <th width="20%">Peran (Role)</th>
+                            <th width="20%">OPD Terkait</th>
+                            <th width="10%" class="text-center">Aksi</th>
+                          </tr>
+                        </thead>
+                        <tbody id="master-user-body">
+                          <!-- Diisi dinamis -->
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- TAB 3: AUDIT LOG -->
+              <div class="tab-pane fade" id="tab-log" role="tabpanel">
+                <div class="custom-card">
+                  <div class="card-header d-flex justify-content-between align-items-center">
+                    <span><i class="bi bi-list-check me-2 text-primary"></i>Catatan Aktivitas Sistem (Audit
+                      Trail)</span>
+                    <button class="btn btn-outline-secondary btn-sm rounded-pill px-3" onclick="clearAuditLogs()">
+                      <i class="bi bi-trash me-1"></i> Bersihkan Log
+                    </button>
+                  </div>
+                  <div class="card-body">
+                    <div class="table-responsive" style="max-height: 480px; overflow-y: auto;">
+                      <table class="table table-sm table-striped align-middle">
+                        <thead class="table-dark sticky-top">
+                          <tr>
+                            <th width="15%">Waktu</th>
+                            <th width="12%">Username</th>
+                            <th width="12%">Role</th>
+                            <th width="15%">Aktivitas</th>
+                            <th width="12%">Status</th>
+                            <th width="12%">Target</th>
+                            <th width="22%">Keterangan</th>
+                          </tr>
+                        </thead>
+                        <tbody id="master-log-body">
+                          <!-- Diisi dinamis -->
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- TAB 4: TRASH & RESTORE -->
+              <div class="tab-pane fade" id="tab-trash" role="tabpanel">
+                <div class="custom-card border-danger">
+                  <div class="card-header bg-danger bg-opacity-10 text-danger d-flex justify-content-between align-items-center">
+                    <span><i class="bi bi-trash3-fill me-2"></i>Tempat Sampah (Trash Dokumen Usulan)</span>
+                    <span class="badge bg-danger">Khusus Super Admin</span>
+                  </div>
+                  <div class="card-body">
+                    <div class="table-responsive">
+                      <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                          <tr>
+                            <th>Waktu Dihapus</th>
+                            <th>ID Usulan</th>
+                            <th>OPD Pemrakarsa</th>
+                            <th>Judul Regulasi</th>
+                            <th>Dihapus Oleh</th>
+                            <th class="text-center">Aksi Restore</th>
+                          </tr>
+                        </thead>
+                        <tbody id="master-trash-body">
+                          <!-- Diisi dinamis -->
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ============================================== -->
+          <!-- H. DEVELOPER HUB & GOOGLE APPS SCRIPT (GAS) -->
+          <!-- ============================================== -->
+          <div id="page-developer" class="page-content d-none">
+            <div
+              class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center mb-4 gap-2">
+              <div>
+                <h4 class="fw-bold mb-1 text-primary"><i class="bi bi-terminal-fill me-2 text-warning"></i>Developer Hub
+                  & Integrasi Google Apps Script (GAS)</h4>
+                <p class="text-muted small mb-0">Panduan penyebaran backend ke Google Workspace (Google Sheets & Google
+                  Drive)</p>
+              </div>
+              <span class="badge bg-warning text-dark py-2 px-3 rounded-pill small fw-bold">
+                <i class="bi bi-cloud-arrow-up-fill me-1"></i> GAS Backend Ready
+              </span>
+            </div>
+
+            <!-- BANNER KONEKSI DATABASE GOOGLE SHEETS -->
+            <div class="alert alert-success d-flex flex-column flex-md-row align-items-md-center justify-content-between p-4 mb-4 shadow-sm border-success border-2 rounded-4" style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);">
+              <div class="d-flex align-items-center mb-3 mb-md-0">
+                <div class="rounded-circle bg-success text-white d-flex align-items-center justify-content-center me-3 flex-shrink-0" style="width: 54px; height: 54px; font-size: 1.5rem;">
+                  <i class="bi bi-table"></i>
+                </div>
+                <div>
+                  <h6 class="fw-bold mb-1 text-success fs-5">Database Google Sheets Terkoneksi (Live & RBAC Enforced)</h6>
+                  <p class="small text-secondary mb-1" style="line-height: 1.5;">Aplikasi ini tersambung dengan Google Spreadsheet resmi Pemerintah Daerah sebagai penyimpanan database utama.</p>
+                  <div class="d-flex flex-wrap align-items-center gap-2 mt-1">
+                    <span class="badge bg-dark font-monospace py-1.5 px-2.5">ID: 1xDGpXMdDCDeHHCHNpZH-81Ie4Vo_KavZUTX92V26DIU</span>
+                    <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-25 py-1.5 px-2.5"><i class="bi bi-shield-lock-fill me-1"></i> GAS Backend Validated</span>
+                  </div>
+                </div>
+              </div>
+              <a href="https://docs.google.com/spreadsheets/d/1xDGpXMdDCDeHHCHNpZH-81Ie4Vo_KavZUTX92V26DIU/edit?gid=0#gid=0" target="_blank" class="btn btn-success fw-bold rounded-pill px-4 py-2 shadow-sm text-nowrap">
+                <i class="bi bi-box-arrow-up-right me-1"></i> Buka Spreadsheet DB
+              </a>
+            </div>
+
+            <div class="row g-4">
+              <div class="col-12 col-xl-6">
+                <div class="custom-card h-100">
+                  <div class="card-header bg-dark text-white"><i class="bi bi-cpu me-2 text-warning"></i>Arsitektur
+                    Serverless Google Apps Script</div>
+                  <div class="card-body">
+                    <p class="text-muted small" style="line-height: 1.6;">
+                      Aplikasi PROPemperda ini dirancang agar dapat berjalan secara mandiri (Standalone HTML/JS) maupun
+                      diintegrasikan sepenuhnya dengan <strong>Google Workspace (Google Sheets sebagai Database & Google
+                        Drive sebagai penyimpanan file kajian PDF/DOCX)</strong> tanpa biaya langganan server.
+                    </p>
+
+                    <h6 class="fw-bold text-primary mt-4 mb-2"><i class="bi bi-1-circle-fill me-2"></i>Langkah Deploy ke
+                      Google Apps Script:</h6>
+                    <ol class="small text-secondary ps-3 mb-4" style="line-height: 1.8;">
+                      <li>Buka Google Drive dan buat Spreadsheet baru bernama <strong>"DB_PROPemperda_Pasaman"</strong>.
+                      </li>
+                      <li>Pilih menu <strong>Ekstensi > Apps Script</strong>.</li>
+                      <li>Salin seluruh kode backend dari kotak di sebelah kanan ke dalam file <code>Code.gs</code>.
+                      </li>
+                      <li>Klik tombol <strong>Terapkan (Deploy) > Deployment baru</strong>.</li>
+                      <li>Pilih jenis deployment: <strong>Aplikasi Web (Web App)</strong>.</li>
+                      <li>Atur Akses: <em>"Siapa saja (Anyone)"</em> agar aplikasi dapat diakses publik dengan
+                        otentikasi internal.</li>
+                      <li>Salin <strong>Web App URL</strong> dan tempelkan ke konfigurasi koneksi di bawah ini!</li>
+                    </ol>
+
+                    <div class="bg-primary bg-opacity-10 border border-primary border-opacity-25 rounded-3 p-3 mt-4">
+                      <h6 class="fw-bold text-primary mb-2"><i class="bi bi-plug-fill me-1"></i> Uji Koneksi Live Google
+                        Apps Script</h6>
+                      <div class="input-group mb-2 shadow-sm">
+                        <input type="text" id="gas-url-input" class="form-control form-control-sm"
+                          placeholder="https://script.google.com/macros/s/.../exec" value="">
+                        <button class="btn btn-primary btn-sm px-3" onclick="testGasConnection()"><i
+                            class="bi bi-lightning-charge-fill me-1"></i> Test Ping</button>
+                      </div>
+                      <small class="text-muted" style="font-size: 0.75rem;">Saat ini aplikasi beroperasi dalam modus
+                        <strong>Hybrid LocalStorage + Demo Seed Data</strong> untuk kecepatan dan kestabilan
+                        demonstrasi.</small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-12 col-xl-6">
+                <div class="custom-card h-100">
+                  <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                    <span><i class="bi bi-code-slash me-2 text-info"></i>Kode Backend (Code.gs) untuk Google Apps
+                      Script</span>
+                    <button class="btn btn-sm btn-outline-light rounded-pill px-3" onclick="copyGasCode()"><i
+                        class="bi bi-clipboard me-1"></i> Salin Kode</button>
+                  </div>
+                  <div class="card-body p-0">
+                    <div class="code-snippet-box m-3 m-sm-4" style="max-height: 480px;">
+                      <pre class="m-0 text-light"><code><span class="text-secondary">// =========================================================</span>
+<span class="text-secondary">// BACKEND GOOGLE APPS SCRIPT (Code.gs) - PROPEMPERDA PASAMAN</span>
+<span class="text-secondary">// =========================================================</span>
+
+<span class="text-info">const</span> FOLDER_ID = <span class="text-warning">"YOUR_GOOGLE_DRIVE_FOLDER_ID"</span>;
+<span class="text-info">const</span> SHEET_NAME = <span class="text-warning">"Data_Usulan"</span>;
+
+<span class="text-info">function</span> <span class="text-success">doGet</span>(e) {
+  <span class="text-info">var</span> action = e.parameter.action || <span class="text-warning">"read"</span>;
+  <span class="text-info">if</span> (action === <span class="text-warning">"read"</span>) {
+    <span class="text-info">return</span> ContentService.createTextOutput(JSON.stringify(getAllUsulan()))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+  <span class="text-info">return</span> HtmlService.createHtmlOutput(<span class="text-warning">"PROPemperda Pasaman API Running."</span>);
+}
+
+<span class="text-info">function</span> <span class="text-success">doPost</span>(e) {
+  <span class="text-info">try</span> {
+    <span class="text-info">var</span> data = JSON.parse(e.postData.contents);
+    <span class="text-info">var</span> ss = SpreadsheetApp.getActiveSpreadsheet();
+    <span class="text-info">var</span> sheet = ss.getSheetByName(SHEET_NAME) || ss.insertSheet(SHEET_NAME);
+    
+    <span class="text-secondary">// Simpan berkas ke Google Drive jika ada file base64</span>
+    <span class="text-info">var</span> fileUrl = <span class="text-warning">""</span>;
+    <span class="text-info">if</span> (data.fileBase64) {
+      <span class="text-info">var</span> folder = DriveApp.getFolderById(FOLDER_ID);
+      <span class="text-info">var</span> blob = Utilities.newBlob(Utilities.base64Decode(data.fileBase64), data.fileMime, data.fileName);
+      <span class="text-info">var</span> file = folder.createFile(blob);
+      file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+      fileUrl = file.getUrl();
+    }
+    
+    <span class="text-info">var</span> row = [
+      <span class="text-info">new</span> Date(), data.id, data.opd, data.pic, data.wa,
+      data.jenis, data.statusRegulasi, data.judul, data.urgensi,
+      data.ruangLingkup, data.isDelegasi, data.targetSelesai,
+      <span class="text-warning">"Draft"</span>, fileUrl
+    ];
+    sheet.appendRow(row);
+    
+    <span class="text-info">return</span> ContentService.createTextOutput(JSON.stringify({status: <span class="text-warning">"success"</span>, fileUrl: fileUrl}))
+      .setMimeType(ContentService.MimeType.JSON);
+  } <span class="text-info">catch</span> (err) {
+    <span class="text-info">return</span> ContentService.createTextOutput(JSON.stringify({status: <span class="text-warning">"error"</span>, message: err.toString()}))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+<span class="text-info">function</span> <span class="text-success">getAllUsulan</span>() {
+  <span class="text-info">var</span> sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME);
+  <span class="text-info">if</span> (!sheet) <span class="text-info">return</span> [];
+  <span class="text-info">var</span> data = sheet.getDataRange().getValues();
+  <span class="text-info">var</span> headers = data.shift();
+  <span class="text-info">return</span> data.map(<span class="text-info">function</span>(row) {
+    <span class="text-info">return</span> {
+      timestamp: row[0], id: row[1], opd: row[2], pic: row[3],
+      wa: row[4], jenis: row[5], status: row[12], fileUrl: row[13]
+    };
+  });
+}</code></pre>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- FOOTER -->
+        <footer class="mt-auto py-3 bg-body-tertiary border-top text-center text-muted small">
+          <div class="container-fluid">
+            <strong>PROPemperda Kabupaten Pasaman</strong> &copy; 2026 Bagian Hukum Sekretariat Daerah Kabupaten
+            Pasaman. Dikembangkan dengan arsitektur modern untuk percepatan regulasi daerah.
+          </div>
+        </footer>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL 1: UPDATE STATUS / TAHAPAN REGULASI -->
+  <!-- ============================================== -->
+  <div class="modal fade" id="modalUpdateStatus" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+        <div class="modal-header bg-primary text-white p-4">
+          <h5 class="modal-title fw-bold"><i class="bi bi-arrow-up-circle-fill me-2"></i>Update Tahapan Progres Regulasi
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4">
+          <form id="formUpdateStatus" onsubmit="submitUpdateStatus(event)">
+            <input type="hidden" id="modal-status-id">
+            <div class="mb-3">
+              <label class="form-label small fw-bold text-secondary">Judul Peraturan yang Diproses:</label>
+              <input type="text" class="form-control bg-body-tertiary fw-bold text-primary" id="modal-status-judul"
+                readonly>
+            </div>
+            <div class="mb-3">
+              <label class="form-label small fw-bold text-secondary">Tahapan Regulasi Selanjutnya <span
+                  class="text-danger">*</span></label>
+              <select id="modal-new-status" class="form-select" required>
+                <option value="Diverifikasi">Tahap 2: Diverifikasi</option>
+                <option value="Perlu Perbaikan">Tahap 3: Perlu Perbaikan (Revisi)</option>
+                <option value="Harmonisasi">Tahap 4: Harmonisasi (Kanwil Kemenkumham)</option>
+                <option value="Pembahasan">Tahap 5: Pembahasan Bersama (DPRD/Tim Pakar)</option>
+                <option value="Persetujuan">Tahap 6: Persetujuan Bersama</option>
+                <option value="Penetapan">Tahap 7: Penetapan & Pengundangan</option>
+                <option value="Selesai">Tahap 8: Selesai Disahkan (LD / BD)</option>
+              </select>
+            </div>
+            <div class="mb-4">
+              <label class="form-label small fw-bold text-secondary">Catatan / Instruksi Teknis untuk OPD Pemrakarsa
+                <span class="text-danger">*</span></label>
+              <textarea id="modal-status-catatan" class="form-control" rows="3"
+                placeholder="Tuliskan catatan verifikasi, hasil harmonisasi, atau nomor pengundangan..."
+                required></textarea>
+            </div>
+            <div class="d-flex justify-content-end gap-2">
+              <button type="button" class="btn btn-outline-secondary px-4 rounded-pill"
+                data-bs-dismiss="modal">Batal</button>
+              <button type="submit" class="btn btn-primary px-4 rounded-pill shadow-sm">Simpan Progres <i
+                  class="bi bi-check2-circle ms-1"></i></button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL 2: TAMBAH / EDIT OPD -->
+  <!-- ============================================== -->
+  <div class="modal fade" id="modalAddOpd" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+        <div class="modal-header bg-primary text-white p-4">
+          <h5 class="modal-title fw-bold" id="modalOpdTitle"><i class="bi bi-building me-2"></i>Tambah Perangkat Daerah
+            Baru</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4">
+          <form id="formAddOpd" onsubmit="saveOpd(event)">
+            <input type="hidden" id="modal-opd-index">
+            <div class="mb-3">
+              <label class="form-label small fw-bold text-secondary">Kode OPD <span class="text-danger">*</span></label>
+              <input type="text" id="inp-opd-kode" class="form-control" placeholder="Contoh: DIN-KES" required>
+            </div>
+            <div class="mb-4">
+              <label class="form-label small fw-bold text-secondary">Nama Lengkap Perangkat Daerah <span
+                  class="text-danger">*</span></label>
+              <input type="text" id="inp-opd-nama" class="form-control"
+                placeholder="Contoh: Dinas Kesehatan Kabupaten Pasaman" required>
+            </div>
+            <div class="d-flex justify-content-end gap-2">
+              <button type="button" class="btn btn-outline-secondary px-4 rounded-pill"
+                data-bs-dismiss="modal">Batal</button>
+              <button type="submit" id="btnSaveOpd" class="btn btn-primary px-4 rounded-pill shadow-sm">Simpan OPD</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL 3: TAMBAH PENGGUNA (USER RBAC) -->
+  <!-- ============================================== -->
+  <div class="modal fade" id="modalAddUser" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+        <div class="modal-header bg-primary text-white p-4">
+          <h5 class="modal-title fw-bold" id="modalUserTitle"><i class="bi bi-person-plus-fill me-2"></i>Tambah Akun Pengguna Baru</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4">
+          <form id="formAddUser" onsubmit="saveUser(event)">
+            <input type="hidden" id="modal-user-index">
+            <div class="row g-3 mb-4">
+              <div class="col-12 col-md-6">
+                <label class="form-label small fw-bold text-secondary">Username <span
+                    class="text-danger">*</span></label>
+                <input type="text" id="inp-user-username" class="form-control" placeholder="Contoh: pupr_op" required>
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label small fw-bold text-secondary">Password <span
+                    class="text-danger">*</span></label>
+                <input type="text" id="inp-user-password" class="form-control" value="admin123" required>
+              </div>
+              <div class="col-12">
+                <label class="form-label small fw-bold text-secondary">Nama Lengkap / Jabatan <span
+                    class="text-danger">*</span></label>
+                <input type="text" id="inp-user-nama" class="form-control" placeholder="Contoh: Operator Dinas PUPR"
+                  required>
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label small fw-bold text-secondary">Peran (Role) <span
+                    class="text-danger">*</span></label>
+                <select id="inp-user-role" class="form-select" onchange="toggleUserOpdSelect()" required>
+                  <option value="opd">Operator OPD (Pemrakarsa)</option>
+                  <option value="hukum">Admin Bagian Hukum</option>
+                  <option value="pimpinan">Pimpinan (Eksekutif/Legislatif)</option>
+                  <option value="admin">Super Admin</option>
+                </select>
+              </div>
+              <div class="col-12 col-md-6" id="div-user-opd">
+                <label class="form-label small fw-bold text-secondary">OPD Terkait <span
+                    class="text-danger">*</span></label>
+                <select id="inp-user-opd" class="form-select"></select>
+              </div>
+            </div>
+            <div class="d-flex justify-content-end gap-2">
+              <button type="button" class="btn btn-outline-secondary px-4 rounded-pill"
+                data-bs-dismiss="modal">Batal</button>
+              <button type="submit" id="btnSaveUser" class="btn btn-primary px-4 rounded-pill shadow-sm">Simpan Akun</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- JavaScript Bootstrap 5.3 & DataTables Bundle -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
+  <script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
+  <script src="https://cdn.datatables.net/responsive/2.5.0/js/responsive.bootstrap5.min.js"></script>
+
+  <!-- Custom Javascript Logic -->
+  <script src="app.js"></script>
+</body>
+
+</html>
