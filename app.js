@@ -2248,3 +2248,67 @@ function copyGasCode() {
     });
   }
 }
+
+function seedToGas() {
+  if (currentUser && currentUser.role !== "admin") {
+    showAccessDenied("Hanya Super Admin yang dapat melakukan seeding data awal ke Google Sheets.");
+    return;
+  }
+  const gasUrl = localStorage.getItem("propemperda_gas_url");
+  if (!gasUrl || !gasUrl.startsWith("http")) {
+    Swal.fire("Koneksi GAS Belum Diatur!", "Silakan masukkan dan uji Web App URL Google Apps Script terlebih dahulu di atas.", "warning");
+    return;
+  }
+
+  Swal.fire({
+    title: "Unggah Data Demo ke Google Sheets?",
+    text: "Seluruh data contoh (3 Usulan Regulasi, 4 Akun Pengguna, dan Riwayat Log) akan dikirim langsung ke Google Spreadsheet Anda sebagai data contoh (seed data).",
+    icon: "question",
+    showCancelButton: true,
+    confirmButtonColor: "#198754",
+    confirmButtonText: "Ya, Unggah Sekarang!",
+    cancelButtonText: "Batal"
+  }).then((result) => {
+    if (result.isConfirmed) {
+      Swal.fire({
+        title: "Menulis ke Spreadsheet...",
+        text: "Membuat tab sheet dan mengisi baris data contoh ke Google Sheets Anda.",
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
+
+      const payload = {
+        action: "seedDatabase",
+        user: currentUser || { username: "admin", role: "admin" },
+        usulan: usulanList || [],
+        users: masterUserList || [],
+        logs: auditLogs || []
+      };
+
+      fetch(gasUrl, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(payload)
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.success) {
+          Swal.fire({
+            icon: "success",
+            title: "Data Contoh Berhasil Diunggah!",
+            html: `Spreadsheet Anda kini telah terisi dengan data contoh resmi PROPemperda.<br><br><b>Rincian yang diisi:</b><br>• ${data.usulanCount || 0} baris Usulan Regulasi<br>• ${data.usersCount || 0} baris Akun Pengguna<br>• ${data.logsCount || 0} baris Audit Log<br><br><a href="${SPREADSHEET_URL}" target="_blank" class="btn btn-sm btn-outline-success mt-2 fw-bold"><i class="bi bi-box-arrow-up-right me-1"></i> Buka Spreadsheet Sekarang</a>`,
+            confirmButtonColor: "#198754"
+          });
+          logActivity(currentUser.username, "SEED DATABASE", "Mengunggah data contoh (demo seed) ke Google Spreadsheet DB.");
+        } else {
+          Swal.fire("Gagal Mengunggah", (data && data.error) ? data.error : "Gagal memproses seeding ke database.", "error");
+        }
+      })
+      .catch(err => {
+        Swal.fire("Gagal Koneksi!", "Tidak dapat menghubungi endpoint GAS. Pastikan deployment diatur ke 'Anyone'.", "error");
+      });
+    }
+  });
+}

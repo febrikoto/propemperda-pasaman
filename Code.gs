@@ -143,6 +143,10 @@ function doPost(e) {
         result = deleteUser(payload.username);
         logAudit(user.username, user.role, "DELETE USER", "Berhasil", payload.username, "Menghapus akun pengguna.", ip);
         break;
+      case "seedDatabase":
+        result = seedDatabase(payload);
+        logAudit(user.username, user.role, "SEED DATABASE", "Berhasil", "Spreadsheet DB", "Mengunggah data demo awal aplikasi ke Google Sheets.", ip);
+        break;
       default:
         throw new Error("Action " + action + " tidak didukung oleh backend.");
     }
@@ -467,4 +471,81 @@ function deleteUser(username) {
     }
   }
   return { success: true };
+}
+
+function seedDatabase(payload) {
+  var ss = getDb();
+  var uCount = 0, usrCount = 0, logCount = 0, trCount = 0;
+
+  // 1. Seed Usulan
+  if (payload && payload.usulan && payload.usulan.length > 0) {
+    var sheetU = ss.getSheetByName(SHEET_USULAN) || ss.insertSheet(SHEET_USULAN);
+    if (sheetU.getLastRow() === 0) {
+      sheetU.appendRow([
+        "Timestamp", "ID Usulan", "OPD Pemrakarsa", "PIC", "No WhatsApp",
+        "Jenis Regulasi", "Sifat Regulasi", "Peraturan Lama", "Judul Peraturan",
+        "Urgensi", "Ruang Lingkup", "Delegasi", "Keterangan Delegasi",
+        "Dasar Hukum", "Target Selesai", "Pembahasan Awal", "Status", "Step",
+        "Nama File", "File URL Google Drive"
+      ]);
+      sheetU.getRange(1, 1, 1, 20).setFontWeight("bold").setBackground("#0d6efd").setFontColor("#ffffff");
+    }
+    var existingIds = {};
+    if (sheetU.getLastRow() > 1) {
+      var vals = sheetU.getRange(2, 2, sheetU.getLastRow() - 1, 1).getValues();
+      for (var i = 0; i < vals.length; i++) { existingIds[vals[i][0]] = true; }
+    }
+    for (var j = 0; j < payload.usulan.length; j++) {
+      var u = payload.usulan[j];
+      if (!existingIds[u.id]) {
+        sheetU.appendRow([
+          u.timestamp || "2026-07-02 10:00:00", u.id, u.opd, u.pic, u.wa, u.jenis,
+          u.statusRegulasi, u.peraturanLama || "N/A", u.judul, u.urgensi,
+          u.ruangLingkup, u.isDelegasi || "TIDAK", u.delegasiText || "N/A",
+          u.dasarHukum, u.targetSelesai, u.pembahasanAwal, u.status || "Draft",
+          u.step || 1, u.fileName || "", u.fileUrl || ""
+        ]);
+        uCount++;
+      }
+    }
+  }
+
+  // 2. Seed Users
+  if (payload && payload.users && payload.users.length > 0) {
+    var sheetUsr = ss.getSheetByName(SHEET_USERS) || ss.insertSheet(SHEET_USERS);
+    if (sheetUsr.getLastRow() === 0) {
+      sheetUsr.appendRow(["Username", "Password", "Nama Lengkap", "Role", "OPD"]);
+      sheetUsr.getRange(1, 1, 1, 5).setFontWeight("bold").setBackground("#0d6efd").setFontColor("#ffffff");
+    }
+    var existingUser = {};
+    if (sheetUsr.getLastRow() > 1) {
+      var valsUsr = sheetUsr.getRange(2, 1, sheetUsr.getLastRow() - 1, 1).getValues();
+      for (var k = 0; k < valsUsr.length; k++) { existingUser[valsUsr[k][0]] = true; }
+    }
+    for (var m = 0; m < payload.users.length; m++) {
+      var usr = payload.users[m];
+      if (!existingUser[usr.username]) {
+        sheetUsr.appendRow([usr.username, usr.password, usr.nama, usr.role, usr.opd || "Semua OPD"]);
+        usrCount++;
+      }
+    }
+  }
+
+  // 3. Seed Logs
+  if (payload && payload.logs && payload.logs.length > 0) {
+    var sheetL = ss.getSheetByName(SHEET_LOGS) || ss.insertSheet(SHEET_LOGS);
+    if (sheetL.getLastRow() === 0) {
+      sheetL.appendRow(["Timestamp", "Username", "Role", "IP Address", "Aktivitas", "Status", "Target", "Keterangan"]);
+      sheetL.getRange(1, 1, 1, 8).setFontWeight("bold").setBackground("#0f172a").setFontColor("#ffffff");
+    }
+    // Hanya tambahkan maksimal 5 log terbaru agar tidak berlebihan
+    var maxLogs = Math.min(payload.logs.length, 5);
+    for (var n = 0; n < maxLogs; n++) {
+      var lg = payload.logs[n];
+      sheetL.appendRow([lg.time || "-", lg.user || "-", lg.role || "admin", lg.ip || "Client", lg.action || "-", lg.status || "Berhasil", lg.target || "-", lg.desc || "-"]);
+      logCount++;
+    }
+  }
+
+  return { success: true, usulanCount: uCount, usersCount: usrCount, logsCount: logCount, trashCount: 0 };
 }
