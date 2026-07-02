@@ -578,6 +578,11 @@ function switchPage(targetId) {
     renderMasterUsers();
     renderAuditLogs();
     if (typeof renderTrashTable === "function") renderTrashTable();
+  } else if (targetId === "page-developer") {
+    const savedUrl = localStorage.getItem("propemperda_gas_url");
+    if (savedUrl && document.getElementById("gas-url-input")) {
+      document.getElementById("gas-url-input").value = savedUrl;
+    }
   }
 
   window.scrollTo({ top: 0, behavior: "smooth" });
@@ -2254,9 +2259,36 @@ function seedToGas() {
     showAccessDenied("Hanya Super Admin yang dapat melakukan seeding data awal ke Google Sheets.");
     return;
   }
-  const gasUrl = localStorage.getItem("propemperda_gas_url");
+  let gasUrl = localStorage.getItem("propemperda_gas_url");
+  const inputEl = document.getElementById("gas-url-input");
+  if ((!gasUrl || !gasUrl.startsWith("http")) && inputEl && inputEl.value.trim().startsWith("http")) {
+    gasUrl = inputEl.value.trim();
+    localStorage.setItem("propemperda_gas_url", gasUrl);
+  }
+
   if (!gasUrl || !gasUrl.startsWith("http")) {
-    Swal.fire("Koneksi GAS Belum Diatur!", "Silakan masukkan dan uji Web App URL Google Apps Script terlebih dahulu di atas.", "warning");
+    Swal.fire({
+      title: "Koneksi GAS Belum Diatur",
+      text: "Silakan tempelkan Web App URL dari Google Apps Script Anda di sini (yang berakhiran /exec):",
+      input: "url",
+      inputPlaceholder: "https://script.google.com/macros/s/.../exec",
+      icon: "info",
+      showCancelButton: true,
+      confirmButtonText: "Simpan & Unggah Demo Data",
+      cancelButtonText: "Batal",
+      confirmButtonColor: "#0d6efd",
+      inputValidator: (value) => {
+        if (!value || !value.startsWith("http")) {
+          return "URL tidak valid! Harus dimulai dengan https://script.google.com...";
+        }
+      }
+    }).then((res) => {
+      if (res.isConfirmed && res.value) {
+        localStorage.setItem("propemperda_gas_url", res.value.trim());
+        if (inputEl) inputEl.value = res.value.trim();
+        seedToGas(); // Panggil kembali setelah URL tersimpan
+      }
+    });
     return;
   }
 
