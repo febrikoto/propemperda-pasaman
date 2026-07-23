@@ -133,6 +133,12 @@
     await testPost("deleteUser", { username: testUser }, "Menghapus Data Akun Uji Coba (Cleanup)");
 
     logMsg("\n==========================================\n");
+    // Dummy base64 text "Hello World"
+    const dummyBase64 = "SGVsbG8gV29ybGQ="; 
+    await testPost("uploadFile", { fileBase64: dummyBase64, fileName: "test_diagnostik.txt", fileMime: "text/plain" }, "Menguji Upload File ke Google Drive");
+
+
+    logMsg("\n==========================================\n");
     logMsg("🏁 HASIL AKHIR: " + passCount + " Berhasil | " + failCount + " Gagal");
     
     if (failCount === 0) {
