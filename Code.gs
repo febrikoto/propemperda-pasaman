@@ -534,7 +534,9 @@ function updateUser(oldUsername, userData) {
       return { success: true };
     }
   }
-  return { success: false, error: "User not found" };
+  // Jika tidak ditemukan di sheet, tambahkan saja sebagai baris baru (fallback)
+  sheet.appendRow([userData.username, userData.password, userData.nama, userData.role, userData.opd]);
+  return { success: true };
 }
 
 function createOpd(opdData) {
@@ -559,7 +561,9 @@ function updateOpd(oldKode, opdData) {
       return { success: true };
     }
   }
-  return { success: false, error: "OPD not found" };
+  // Jika tidak ditemukan di sheet, tambahkan saja sebagai baris baru (fallback)
+  sheet.appendRow([opdData.kode, opdData.nama]);
+  return { success: true };
 }
 
 function deleteOpd(kode) {
