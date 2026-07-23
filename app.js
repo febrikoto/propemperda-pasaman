@@ -1114,11 +1114,14 @@ function handleSaveUsulan(event) {
           const data = await res.json();
           if (data.success && data.fileUrl) {
             driveUrl = data.fileUrl;
+          } else {
+            console.error("GAS Error:", data.error);
+            await Swal.fire("Gagal Mengunggah", "Server menolak file: " + (data.error || "Unknown Error"), "error");
           }
         }
       } catch (e) {
         console.log("Gagal mengunggah file ke Google Drive:", e);
-        showToast("Terjadi kesalahan saat mengunggah file ke Drive.", "error");
+        await Swal.fire("Koneksi Terputus", "Gagal mengirim file ke Google Drive. Pesan: " + e.message, "error");
       }
     }
     
