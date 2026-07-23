@@ -345,9 +345,14 @@ function executeGasPost(action, payload) {
   })
     .then(res => res.json())
     .then(data => {
-      if (!data.success && data.code === 403) {
-        if (action !== "logActivity" && action !== "getUsulanList") {
-          showAccessDenied(data.error);
+      if (!data.success) {
+        if (data.code === 403) {
+          if (action !== "logActivity" && action !== "getUsulanList") {
+            showAccessDenied(data.error);
+          }
+        } else if (data.code === 500) {
+          console.error("Backend Error on " + action + ":", data.error);
+          showToast("Error Sistem: " + data.error, "error");
         }
       } else if (data.success) {
         console.log(`GAS Post [${action}] synchronized with Google Sheets successfully.`);
