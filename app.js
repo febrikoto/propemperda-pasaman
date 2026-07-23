@@ -1111,7 +1111,7 @@ function handleSaveUsulan(event) {
         }
 
         saveToStorage("propemperda_usulan", usulanList);
-        executeGasPost("updateUsulan", { id: editId, data: existingItem });
+        executeGasPost("updateUsulan", { id: editId, item: existingItem });
         logActivity(currentUser.username, "UPDATE USULAN", `Memperbarui dokumen [${editId}]: ${judul.substring(0, 40)}...`, "Berhasil", editId);
       }
     } else {
@@ -1146,7 +1146,7 @@ function handleSaveUsulan(event) {
 
       usulanList.unshift(newItem);
       saveToStorage("propemperda_usulan", usulanList);
-      executeGasPost("createUsulan", { data: newItem });
+      executeGasPost("createUsulan", { item: newItem });
       logActivity(currentUser.username, "CREATE USULAN", `Mendaftarkan usulan baru [${newId}]: ${judul.substring(0, 40)}...`, "Berhasil", newId);
     }
 
@@ -1488,6 +1488,7 @@ function submitUpdateStatus(event) {
   });
 
   saveToStorage("propemperda_usulan", usulanList);
+  executeGasPost("updateStatus", { id: id, status: newSt, note: catatan });
   logActivity(currentUser.username, "UPDATE STATUS", `Mengubah status [${id}] menjadi ${newSt}`);
 
   const modalEl = document.getElementById("modalUpdateStatus");
