@@ -13,6 +13,7 @@ const FOLDER_ID = "YOUR_GOOGLE_DRIVE_FOLDER_ID"; // Ganti dengan ID Folder Googl
 const SHEET_USULAN = "Data_Usulan";
 const SHEET_TRASH = "Trash_Usulan";
 const SHEET_USERS = "Master_Users";
+const SHEET_OPD = "Master_OPD";
 const SHEET_LOGS = "Audit_Log";
 
 /**
@@ -60,7 +61,12 @@ function doGet(e) {
     var logs = getAuditLogs();
     return ContentService.createTextOutput(JSON.stringify({ success: true, data: logs }))
       .setMimeType(ContentService.MimeType.JSON);
-  } else if (action === "getTrashList") {
+  } else if (action === "getUsers") {
+    var users = getUsers();
+    return ContentService.createTextOutput(JSON.stringify({ success: true, data: users })).setMimeType(ContentService.MimeType.JSON);
+  } else if (action === "getOpds") {
+    var opds = getOpds();
+    return ContentService.createTextOutput(JSON.stringify({ success: true, data: opds })).setMimeType(ContentService.MimeType.JSON); } else if (action === "getTrashList") {
     var trash = getTrashList();
     return ContentService.createTextOutput(JSON.stringify({ success: true, data: trash }))
       .setMimeType(ContentService.MimeType.JSON);
@@ -138,6 +144,22 @@ function doPost(e) {
       case "createUser":
         result = createUser(payload.userData);
         logAudit(user.username, user.role, "CREATE USER", "Berhasil", payload.userData.username, "Membuat akun baru role " + payload.userData.role, ip);
+        break;
+      case "updateUser":
+        result = updateUser(payload.oldUsername, payload.userData);
+        logAudit(user.username, user.role, "UPDATE USER", "Berhasil", payload.userData.username, "Memperbarui akun pengguna", ip);
+        break;
+      case "createOpd":
+        result = createOpd(payload.opdData);
+        logAudit(user.username, user.role, "CREATE OPD", "Berhasil", payload.opdData.kode, "Membuat OPD baru: " + payload.opdData.nama, ip);
+        break;
+      case "updateOpd":
+        result = updateOpd(payload.oldKode, payload.opdData);
+        logAudit(user.username, user.role, "UPDATE OPD", "Berhasil", payload.opdData.kode, "Memperbarui data OPD", ip);
+        break;
+      case "deleteOpd":
+        result = deleteOpd(payload.kode);
+        logAudit(user.username, user.role, "DELETE OPD", "Berhasil", payload.kode, "Menghapus OPD.", ip);
         break;
       case "deleteUser":
         result = deleteUser(payload.username);
@@ -471,6 +493,82 @@ function deleteUser(username) {
   var data = sheet.getDataRange().getValues();
   for (var i = 1; i < data.length; i++) {
     if (data[i][0] === username) {
+      sheet.deleteRow(i + 1);
+      return { success: true };
+    }
+  }
+  return { success: true };
+}
+
+
+function getUsers() {
+  var ss = getDb();
+  var sheet = ss.getSheetByName(SHEET_USERS);
+  if (!sheet || sheet.getLastRow() <= 1) return [];
+  var data = sheet.getDataRange().getValues();
+  data.shift();
+  return data.map(function(row) {
+    return { username: row[0], password: row[1], nama: row[2], role: row[3], opd: row[4] };
+  });
+}
+
+function getOpds() {
+  var ss = getDb();
+  var sheet = ss.getSheetByName(SHEET_OPD);
+  if (!sheet || sheet.getLastRow() <= 1) return [];
+  var data = sheet.getDataRange().getValues();
+  data.shift();
+  return data.map(function(row) {
+    return { kode: row[0], nama: row[1] };
+  });
+}
+
+function updateUser(oldUsername, userData) {
+  var ss = getDb();
+  var sheet = ss.getSheetByName(SHEET_USERS);
+  if (!sheet) return { success: false, error: "Sheet not found" };
+  var data = sheet.getDataRange().getValues();
+  for (var i = 1; i < data.length; i++) {
+    if (data[i][0] === oldUsername) {
+      sheet.getRange(i + 1, 1, 1, 5).setValues([[userData.username, userData.password, userData.nama, userData.role, userData.opd]]);
+      return { success: true };
+    }
+  }
+  return { success: false, error: "User not found" };
+}
+
+function createOpd(opdData) {
+  var ss = getDb();
+  var sheet = ss.getSheetByName(SHEET_OPD) || ss.insertSheet(SHEET_OPD);
+  if (sheet.getLastRow() === 0) {
+    sheet.appendRow(["Kode", "Nama OPD"]);
+    sheet.getRange(1, 1, 1, 2).setFontWeight("bold").setBackground("#0d6efd").setFontColor("#ffffff");
+  }
+  sheet.appendRow([opdData.kode, opdData.nama]);
+  return { success: true };
+}
+
+function updateOpd(oldKode, opdData) {
+  var ss = getDb();
+  var sheet = ss.getSheetByName(SHEET_OPD);
+  if (!sheet) return { success: false, error: "Sheet not found" };
+  var data = sheet.getDataRange().getValues();
+  for (var i = 1; i < data.length; i++) {
+    if (data[i][0] === oldKode) {
+      sheet.getRange(i + 1, 1, 1, 2).setValues([[opdData.kode, opdData.nama]]);
+      return { success: true };
+    }
+  }
+  return { success: false, error: "OPD not found" };
+}
+
+function deleteOpd(kode) {
+  var ss = getDb();
+  var sheet = ss.getSheetByName(SHEET_OPD);
+  if (!sheet) return { success: true };
+  var data = sheet.getDataRange().getValues();
+  for (var i = 1; i < data.length; i++) {
+    if (data[i][0] === kode) {
       sheet.deleteRow(i + 1);
       return { success: true };
     }

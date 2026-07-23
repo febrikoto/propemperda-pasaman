@@ -292,19 +292,38 @@ function saveToStorage(key, data) {
 function syncWithGoogleSheets() {
   const gasUrl = localStorage.getItem("propemperda_gas_url");
   if (gasUrl && gasUrl.startsWith("http")) {
-    fetch(`${gasUrl}?action=getUsulanList&role=${currentUser ? currentUser.role : "guest"}&opd=${encodeURIComponent(currentUser ? currentUser.opd : "")}`)
+    const roleParam = `role=${currentUser ? currentUser.role : "guest"}&opd=${encodeURIComponent(currentUser ? currentUser.opd : "")}`;
+    
+    fetch(`${gasUrl}?action=getUsulanList&${roleParam}`)
       .then(res => res.json())
       .then(data => {
-        if (data.success && data.data && data.data.length > 0) {
+        if (data.success && data.data) {
           usulanList = data.data;
           saveToStorage("propemperda_usulan", usulanList);
           renderUsulanTable();
           renderDashboardStats();
         }
-      })
-      .catch(err => {
-        console.log("GAS Sync info: Using offline/localStorage fallback ->", err);
-      });
+      }).catch(e => console.log(e));
+
+    if (currentUser && (currentUser.role === "admin" || currentUser.role === "hukum")) {
+      fetch(`${gasUrl}?action=getUsers&${roleParam}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.success && data.data && data.data.length > 0) {
+            masterUserList = data.data;
+            saveToStorage("propemperda_users", masterUserList);
+          }
+        }).catch(e => console.log(e));
+        
+      fetch(`${gasUrl}?action=getOpds&${roleParam}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.success && data.data && data.data.length > 0) {
+            masterOpdList = data.data;
+            saveToStorage("propemperda_opds", masterOpdList);
+          }
+        }).catch(e => console.log(e));
+    }
   }
 }
 
@@ -1696,6 +1715,7 @@ function saveOpd(event) {
   } else {
     masterOpdList.push({ kode, nama });
     saveToStorage("propemperda_opds", masterOpdList);
+    executeGasPost("createOpd", { opdData: { kode, nama } });
     logActivity(currentUser.username, "ADD MASTER OPD", `Menambah OPD baru: [${kode}] ${nama}`);
     showToast("Perangkat Daerah berhasil ditambahkan.", "success");
   }
@@ -1719,8 +1739,10 @@ function deleteOpd(index) {
     cancelButtonText: "Batal"
   }).then((result) => {
     if (result.isConfirmed) {
+      const oToDelete = masterOpdList[index].kode;
       masterOpdList.splice(index, 1);
       saveToStorage("propemperda_opds", masterOpdList);
+      executeGasPost("deleteOpd", { kode: oToDelete });
       renderMasterOpd();
       populateDropdowns();
       showToast("OPD telah dihapus.", "info");
@@ -1838,6 +1860,7 @@ function saveUser(event) {
     }
     masterUserList[idx] = { username, password, nama, role, opd };
     saveToStorage("propemperda_users", masterUserList);
+    executeGasPost("updateUser", { oldUsername: oldU, userData: masterUserList[idx] });
     logActivity(currentUser.username, "UPDATE USER", `Memperbarui akun [${username}] role ${role}`);
     showToast(`Akun [${username}] berhasil diperbarui.`, "success");
   } else {
@@ -1847,6 +1870,7 @@ function saveUser(event) {
     }
     masterUserList.push({ username, password, nama, role, opd });
     saveToStorage("propemperda_users", masterUserList);
+    executeGasPost("createUser", { userData: { username, password, nama, role, opd } });
     logActivity(currentUser.username, "ADD USER", `Membuat akun baru [${username}] role ${role}`);
     showToast(`Akun [${username}] berhasil dibuat.`, "success");
   }
@@ -1869,8 +1893,10 @@ function deleteUser(index) {
     cancelButtonText: "Batal"
   }).then((result) => {
     if (result.isConfirmed) {
+      const uToDelete = masterUserList[index].username;
       masterUserList.splice(index, 1);
       saveToStorage("propemperda_users", masterUserList);
+      executeGasPost("deleteUser", { username: uToDelete });
       renderMasterUsers();
       showToast("Akun telah dihapus.", "info");
     }
