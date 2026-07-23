@@ -1052,29 +1052,77 @@ function handleSaveUsulan(event) {
     return;
   }
 
-  // Simulate progress upload
+  // Validasi ukuran file (Maksimal 5MB)
+  if (fileInput.files && fileInput.files.length > 0) {
+    const file = fileInput.files[0];
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+      Swal.fire("File Terlalu Besar!", "Ukuran maksimal file dokumen adalah 5 MB untuk menjaga kestabilan server Google Drive.", "warning");
+      return;
+    }
+  }
+
   const progBox = document.getElementById("upload-progress-container");
   const progBar = document.getElementById("upload-progress-bar");
-  if (progBox) progBox.classList.remove("d-none");
-  let width = 0;
+  
+  async function processForm() {
+    if (progBox) progBox.classList.remove("d-none");
+    if (progBar) progBar.style.width = "10%";
 
-  const interval = setInterval(() => {
-    width += 25;
-    if (progBar) progBar.style.width = width + "%";
-    if (width >= 100) {
-      clearInterval(interval);
-      finishSaving();
-    }
-  }, 150);
-
-  function finishSaving() {
-    if (progBox) progBox.classList.add("d-none");
-    if (progBar) progBar.style.width = "0%";
     const nowStr = new Date().toISOString().replace("T", " ").substring(0, 19);
     let fileNameVal = "Dokumen_Naskah_Akademik_Draft.pdf";
+    let driveUrl = "#";
+
+    // Cek apakah ada file yang diupload
     if (fileInput.files && fileInput.files.length > 0) {
-      fileNameVal = fileInput.files[0].name;
+      const file = fileInput.files[0];
+      fileNameVal = file.name;
+      
+      if (progBar) progBar.style.width = "30%";
+      
+      try {
+        // Baca file sebagai Base64
+        const base64Data = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => {
+            const base64Str = reader.result.split(',')[1];
+            resolve(base64Str);
+          };
+          reader.onerror = error => reject(error);
+          reader.readAsDataURL(file);
+        });
+
+        if (progBar) progBar.style.width = "60%";
+
+        // Upload ke GAS secara Asynchronous
+        const gasUrl = localStorage.getItem("propemperda_gas_url");
+        if (gasUrl && gasUrl.startsWith("http")) {
+          const payload = {
+            action: "uploadFile",
+            user: currentUser || { username: "Anonymous", role: "guest" },
+            ip: "Client-Browser",
+            fileBase64: base64Data,
+            fileName: fileNameVal,
+            fileMime: file.type || "application/pdf"
+          };
+          
+          const res = await fetch(gasUrl, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify(payload)
+          });
+          const data = await res.json();
+          if (data.success && data.fileUrl) {
+            driveUrl = data.fileUrl;
+          }
+        }
+      } catch (e) {
+        console.log("Gagal mengunggah file ke Google Drive:", e);
+        showToast("Terjadi kesalahan saat mengunggah file ke Drive.", "error");
+      }
     }
+    
+    if (progBar) progBar.style.width = "100%";
 
     if (editId) {
       // Update existing
@@ -1084,10 +1132,12 @@ function handleSaveUsulan(event) {
         if (currentUser.role === "opd") {
           if (existingItem.opd !== currentUser.opd) {
             showAccessDenied("Aksi ditolak: Anda tidak dapat mengedit data milik instansi lain.");
+            if (progBox) progBox.classList.add("d-none");
             return;
           }
           if (existingItem.status !== "Draft" && existingItem.status !== "Perlu Perbaikan") {
             showAccessDenied(`Aksi ditolak: Dokumen status "${existingItem.status}" sudah terkunci dari pengeditan operator OPD.`);
+            if (progBox) progBox.classList.add("d-none");
             return;
           }
         }
@@ -1106,8 +1156,12 @@ function handleSaveUsulan(event) {
         existingItem.dasarHukum = dasarHukum;
         existingItem.targetSelesai = targetSelesai;
         existingItem.pembahasanAwal = pembahasanAwal;
+        
         if (fileInput.files[0]) {
-          existingItem.fileName = fileInput.files[0].name;
+          existingItem.fileName = fileNameVal;
+          if (driveUrl !== "#") {
+            existingItem.fileUrl = driveUrl;
+          }
         }
 
         saveToStorage("propemperda_usulan", usulanList);
@@ -1117,7 +1171,7 @@ function handleSaveUsulan(event) {
     } else {
       // Create new
       const newId = `USL-${new Date().getFullYear()}-${String(usulanList.length + 1).padStart(3, '0')}`;
-
+      
       const newItem = {
         id: newId,
         timestamp: nowStr,
@@ -1138,7 +1192,7 @@ function handleSaveUsulan(event) {
         status: "Draft",
         step: 1,
         fileName: fileNameVal,
-        fileUrl: "#",
+        fileUrl: driveUrl,
         timeline: [
           { step: 1, title: "Draft Diajukan", time: nowStr.split(" ")[0], desc: `Didaftarkan oleh ${currentUser.nama} (${opd}).`, completed: true }
         ]
@@ -1153,17 +1207,22 @@ function handleSaveUsulan(event) {
     renderUsulanTable();
     renderDashboardStats();
     resetUsulanForm();
+    
+    if (progBox) progBox.classList.add("d-none");
+    if (progBar) progBar.style.width = "0%";
 
     Swal.fire({
       icon: "success",
       title: editId ? "Perubahan Disimpan!" : "Usulan Berhasil Didaftarkan!",
-      text: "Dokumen rancangan regulasi telah tercatat dalam sistem PROPemperda dan tersinkronisasi.",
+      text: "Dokumen rancangan regulasi telah tercatat dalam sistem PROPemperda beserta file lampirannya.",
       timer: 2000,
       showConfirmButton: false
     }).then(() => {
       switchPage("page-usulan");
     });
   }
+
+  processForm();
 }
 
 /**

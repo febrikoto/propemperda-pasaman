@@ -9,7 +9,7 @@
  */
 
 const SPREADSHEET_ID = "1xDGpXMdDCDeHHCHNpZH-81Ie4Vo_KavZUTX92V26DIU";
-const FOLDER_ID = "YOUR_GOOGLE_DRIVE_FOLDER_ID"; // Ganti dengan ID Folder Google Drive Anda jika ingin simpan file fisik
+const FOLDER_ID = "13BGwtqoooY-A4VX8dha7MpSboEsLX2HJ"; // Folder Google Drive untuk menyimpan file fisik
 const SHEET_USULAN = "Data_Usulan";
 const SHEET_TRASH = "Trash_Usulan";
 const SHEET_USERS = "Master_Users";
