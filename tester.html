@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Diagnostic Tester - PROPemperda GAS</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { background-color: #f8f9fa; padding: 20px; font-family: system-ui, -apple-system, sans-serif; }
+    .log-box { background: #1e1e1e; color: #00ff00; font-family: monospace; padding: 15px; border-radius: 8px; height: 400px; overflow-y: auto; white-space: pre-wrap; font-size: 0.9rem;}
+    .pass { color: #00ff00; font-weight: bold; }
+    .fail { color: #ff3333; font-weight: bold; }
+    .info { color: #a9b7c6; }
+  </style>
+</head>
+<body>
+
+<div class="container max-w-3xl">
+  <div class="card shadow-sm border-0 mb-4">
+    <div class="card-body">
+      <h4 class="card-title fw-bold text-primary mb-3"><i class="bi bi-shield-check me-2"></i> Alat Uji Diagnostik Google Sheets API</h4>
+      <p class="text-muted small">Masukkan URL Web App Google Apps Script Anda di bawah ini untuk menguji apakah seluruh fitur baca/tulis ke Google Sheets sudah berfungsi sempurna.</p>
+      
+      <div class="input-group mb-3">
+        <span class="input-group-text bg-light">URL GAS</span>
+        <input type="text" id="inp-url" class="form-control font-monospace" placeholder="https://script.google.com/macros/s/.../exec">
+        <button class="btn btn-primary fw-bold px-4" onclick="runDiagnostics()" id="btn-run">Jalankan Test 🚀</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card shadow-sm border-0">
+    <div class="card-header bg-dark text-white fw-bold">
+      Terminal Log
+    </div>
+    <div class="card-body p-0">
+      <div id="terminal" class="log-box">Menunggu instruksi...</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Load saved URL from app if exists
+  const savedUrl = localStorage.getItem("propemperda_gas_url");
+  if (savedUrl) document.getElementById("inp-url").value = savedUrl;
+
+  const terminal = document.getElementById("terminal");
+
+  function logMsg(msg, type = "info") {
+    let spanClass = "info";
+    if (type === "pass") spanClass = "pass";
+    if (type === "fail") spanClass = "fail";
+    terminal.innerHTML += \`<span class="\${spanClass}">\${msg}</span>\n\`;
+    terminal.scrollTop = terminal.scrollHeight;
+  }
+
+  async function runDiagnostics() {
+    const gasUrl = document.getElementById("inp-url").value.trim();
+    if (!gasUrl || !gasUrl.startsWith("http")) {
+      alert("Masukkan URL Web App Google Apps Script yang valid!");
+      return;
+    }
+
+    document.getElementById("btn-run").disabled = true;
+    terminal.innerHTML = "";
+    logMsg("🚀 Memulai Uji Diagnostik Database Google Sheets...\n");
+    logMsg("URL Target: " + gasUrl + "\n");
+
+    let passCount = 0, failCount = 0;
+
+    async function testGet(action, testName) {
+      logMsg(\`-> Sedang menguji: \${testName}...\`);
+      try {
+        const res = await fetch(\`\${gasUrl}?action=\${action}&role=admin\`);
+        const data = await res.json();
+        if (data.success) {
+          logMsg(\`   [OK] \${testName} berhasil. Ditemukan \${data.data ? data.data.length : 0} baris data.\`, "pass");
+          passCount++;
+        } else {
+          logMsg(\`   [GAGAL] \${testName} - Error: \${data.error}\`, "fail");
+          failCount++;
+        }
+      } catch (e) {
+        logMsg(\`   [GAGAL] \${testName} - Exception: \${e.message}\`, "fail");
+        failCount++;
+      }
+    }
+
+    async function testPost(action, payload, testName) {
+      logMsg(\`-> Sedang menguji: \${testName}...\`);
+      try {
+        const body = {
+          action: action,
+          user: { username: "tester_diag", role: "admin" },
+          ip: "Diagnostic-Tool",
+          ...payload
+        };
+        const res = await fetch(gasUrl, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify(body)
+        });
+        const data = await res.json();
+        if (data.success) {
+          logMsg(\`   [OK] \${testName} berhasil dieksekusi.\`, "pass");
+          passCount++;
+        } else {
+          logMsg(\`   [GAGAL] \${testName} - Error: \${data.error}\`, "fail");
+          failCount++;
+        }
+      } catch (e) {
+        logMsg(\`   [GAGAL] \${testName} - Exception: \${e.message}\`, "fail");
+        failCount++;
+      }
+    }
+
+    // Eksekusi Test
+    const testStamp = Date.now();
+    const testOpdCode = "DIAG-" + testStamp;
+    const testUser = "user_" + testStamp;
+
+    // READ TESTS
+    await testGet("getOpds", "Membaca Master OPD");
+    await testGet("getUsers", "Membaca Master Users");
+    await testGet("getUsulanList", "Membaca Data Usulan");
+    
+    logMsg("\n==========================================\n");
+
+    // WRITE TESTS (CREATE)
+    await testPost("createOpd", { opdData: { kode: testOpdCode, nama: "OPD Uji Coba Diagnostik" } }, "Menulis Data OPD Baru");
+    await testPost("createUser", { userData: { username: testUser, password: "123", nama: "Tester", role: "opd", opd: testOpdCode } }, "Menulis Data Akun Pengguna Baru");
+    
+    logMsg("\n==========================================\n");
+
+    // WRITE TESTS (DELETE / CLEANUP)
+    await testPost("deleteOpd", { kode: testOpdCode }, "Menghapus Data OPD Uji Coba (Cleanup)");
+    await testPost("deleteUser", { username: testUser }, "Menghapus Data Akun Uji Coba (Cleanup)");
+
+    logMsg("\n==========================================\n");
+    logMsg(\`🏁 HASIL AKHIR: \${passCount} Berhasil | \${failCount} Gagal\`);
+    
+    if (failCount === 0) {
+      logMsg("\n🎉 LUAR BIASA! Seluruh konfigurasi backend dan Google Sheets Anda sudah berfungsi 100% sempurna.", "pass");
+    } else {
+      logMsg("\n⚠️ TERDAPAT KENDALA. Periksa pesan gagal berwarna merah di atas. Pastikan nama tab sheet sudah sesuai (Master_OPD, Master_Users, dll).", "fail");
+    }
+
+    document.getElementById("btn-run").disabled = false;
+  }
+</script>
+
+</body>
+</html>
