@@ -1695,6 +1695,7 @@ function saveOpd(event) {
   if (indexStr !== "") {
     const idx = parseInt(indexStr);
     const oldNama = masterOpdList[idx].nama;
+    const oldKode = masterOpdList[idx].kode;
     masterOpdList[idx] = { kode, nama };
 
     // Update data usulan dan user jika nama OPD berubah agar konsisten
@@ -1710,6 +1711,7 @@ function saveOpd(event) {
     }
 
     saveToStorage("propemperda_opds", masterOpdList);
+    executeGasPost("updateOpd", { oldKode: oldKode, opdData: masterOpdList[idx] });
     logActivity(currentUser.username, "UPDATE MASTER OPD", `Memperbarui OPD [${kode}] ${nama}`);
     showToast("Perangkat Daerah berhasil diperbarui.", "success");
   } else {
@@ -1858,6 +1860,7 @@ function saveUser(event) {
       Swal.fire("Username Sudah Ada!", "Gunakan username lain yang belum terdaftar.", "error");
       return;
     }
+    const oldU = masterUserList[idx].username;
     masterUserList[idx] = { username, password, nama, role, opd };
     saveToStorage("propemperda_users", masterUserList);
     executeGasPost("updateUser", { oldUsername: oldU, userData: masterUserList[idx] });
