@@ -634,6 +634,28 @@ function seedDatabase(payload) {
     }
   }
 
+  // 2.5 Seed OPD
+  var opdCount = 0;
+  if (payload && payload.opds && payload.opds.length > 0) {
+    var sheetOpd = ss.getSheetByName(SHEET_OPD) || ss.insertSheet(SHEET_OPD);
+    if (sheetOpd.getLastRow() === 0) {
+      sheetOpd.appendRow(["Kode", "Nama OPD"]);
+      sheetOpd.getRange(1, 1, 1, 2).setFontWeight("bold").setBackground("#0d6efd").setFontColor("#ffffff");
+    }
+    var existingOpd = {};
+    if (sheetOpd.getLastRow() > 1) {
+      var valsOpd = sheetOpd.getRange(2, 1, sheetOpd.getLastRow() - 1, 1).getValues();
+      for (var o = 0; o < valsOpd.length; o++) { existingOpd[valsOpd[o][0]] = true; }
+    }
+    for (var p = 0; p < payload.opds.length; p++) {
+      var op = payload.opds[p];
+      if (!existingOpd[op.kode]) {
+        sheetOpd.appendRow([op.kode, op.nama]);
+        opdCount++;
+      }
+    }
+  }
+
   // 3. Seed Logs
   if (payload && payload.logs && payload.logs.length > 0) {
     var sheetL = ss.getSheetByName(SHEET_LOGS) || ss.insertSheet(SHEET_LOGS);
@@ -650,5 +672,5 @@ function seedDatabase(payload) {
     }
   }
 
-  return { success: true, usulanCount: uCount, usersCount: usrCount, logsCount: logCount, trashCount: 0 };
+  return { success: true, usulanCount: uCount, usersCount: usrCount, opdsCount: opdCount, logsCount: logCount, trashCount: 0 };
 }

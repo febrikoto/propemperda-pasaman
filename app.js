@@ -2201,6 +2201,7 @@ function seedToGas() {
         user: currentUser || { username: "admin", role: "admin" },
         usulan: usulanList || [],
         users: masterUserList || [],
+        opds: masterOpdList || [],
         logs: auditLogs || []
       };
 
@@ -2215,7 +2216,7 @@ function seedToGas() {
           Swal.fire({
             icon: "success",
             title: "Data Contoh Berhasil Diunggah!",
-            html: `Spreadsheet Anda kini telah terisi dengan data contoh resmi PROPemperda.<br><br><b>Rincian yang diisi:</b><br>• ${data.usulanCount || 0} baris Usulan Regulasi<br>• ${data.usersCount || 0} baris Akun Pengguna<br>• ${data.logsCount || 0} baris Audit Log<br><br><a href="${SPREADSHEET_URL}" target="_blank" class="btn btn-sm btn-outline-success mt-2 fw-bold"><i class="bi bi-box-arrow-up-right me-1"></i> Buka Spreadsheet Sekarang</a>`,
+            html: `Spreadsheet Anda kini telah terisi dengan data contoh resmi PROPemperda.<br><br><b>Rincian yang diisi:</b><br>• ${data.usulanCount || 0} baris Usulan Regulasi<br>• ${data.usersCount || 0} baris Akun Pengguna<br>• ${data.opdsCount || 0} baris Master OPD<br>• ${data.logsCount || 0} baris Audit Log<br><br><a href="${SPREADSHEET_URL}" target="_blank" class="btn btn-sm btn-outline-success mt-2 fw-bold"><i class="bi bi-box-arrow-up-right me-1"></i> Buka Spreadsheet Sekarang</a>`,
             confirmButtonColor: "#198754"
           });
           logActivity(currentUser.username, "SEED DATABASE", "Mengunggah data contoh (demo seed) ke Google Spreadsheet DB.");
