@@ -471,7 +471,7 @@ function applyRbac() {
   const superAdminElements = document.querySelectorAll(".link-super-admin");
 
   // 1. Tombol & Menu Tambah/Edit Usulan (.link-write-access)
-  if (role === "pimpinan") {
+  if (role === "pimpinan" || role === "admin") {
     writeElements.forEach(el => el.classList.add("d-none"));
   } else {
     writeElements.forEach(el => el.classList.remove("d-none"));
@@ -704,189 +704,44 @@ function renderDashboardStats() {
     filteredList = usulanList.filter(u => u.opd === currentUser.opd);
   }
 
-  const total = filteredList.length;
-  const perdaCount = filteredList.filter(u => u.jenis.includes("Perda")).length;
-  const perkadaCount = filteredList.filter(u => u.jenis.includes("Perkada") || u.jenis.includes("Bupati")).length;
-  const prosesCount = filteredList.filter(u => u.status !== "Selesai" && u.status !== "Draft" && !u.status.includes("Tolak")).length;
-  const selesaiCount = filteredList.filter(u => u.status === "Selesai").length;
+  const usulanOpdCount = filteredList.length;
+  const prosesCount = filteredList.filter(u => u.status !== "Selesai" && u.status !== "Draft" && u.status !== "Ditolak" && u.status !== "Perlu Perbaikan").length;
+  const setujuCount = filteredList.filter(u => u.status === "Selesai").length;
+  const perbaikanCount = filteredList.filter(u => u.status === "Perlu Perbaikan").length;
+  const tolakCount = filteredList.filter(u => u.status === "Ditolak").length;
 
-  if (role === "admin") {
-    container.innerHTML = `
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="card-stat d-flex align-items-center justify-content-between border-primary border-start border-4">
-          <div>
-            <span class="text-muted small fw-bold text-uppercase d-block mb-1">Total Dokumen Usulan</span>
-            <h3 class="fw-bold mb-0 text-primary fs-2">${total}</h3>
-            <span class="badge bg-primary bg-opacity-10 text-primary mt-2 small"><i class="bi bi-folder me-1"></i> Seluruh Daerah</span>
-          </div>
-          <div class="card-stat-icon bg-primary bg-opacity-10 text-primary"><i class="bi bi-file-earmark-text-fill"></i></div>
-        </div>
+  container.innerHTML = `
+    <div class="col-6 col-md-4 col-xl-2 mb-3">
+      <div class="card-stat p-3 h-100 d-flex flex-column justify-content-center align-items-center text-center border-primary border-start border-4">
+        <span class="text-muted small fw-bold text-uppercase mb-2">Usulan OPD</span>
+        <h3 class="fw-bold mb-0 text-primary fs-3">${usulanOpdCount}</h3>
       </div>
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="card-stat d-flex align-items-center justify-content-between border-success border-start border-4">
-          <div>
-            <span class="text-muted small fw-bold text-uppercase d-block mb-1">Perangkat Daerah</span>
-            <h3 class="fw-bold mb-0 text-success fs-2">${masterOpdList.length}</h3>
-            <span class="badge bg-success bg-opacity-10 text-success mt-2 small"><i class="bi bi-building me-1"></i> Master OPD Aktif</span>
-          </div>
-          <div class="card-stat-icon bg-success bg-opacity-10 text-success"><i class="bi bi-buildings-fill"></i></div>
-        </div>
+    </div>
+    <div class="col-6 col-md-4 col-xl-2 mb-3">
+      <div class="card-stat p-3 h-100 d-flex flex-column justify-content-center align-items-center text-center border-info border-start border-4">
+        <span class="text-muted small fw-bold text-uppercase mb-2">Diproses</span>
+        <h3 class="fw-bold mb-0 text-info fs-3">${prosesCount}</h3>
       </div>
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="card-stat d-flex align-items-center justify-content-between border-info border-start border-4">
-          <div>
-            <span class="text-muted small fw-bold text-uppercase d-block mb-1">Akun Pengguna</span>
-            <h3 class="fw-bold mb-0 text-info fs-2">${masterUserList.length}</h3>
-            <span class="badge bg-info bg-opacity-10 text-info mt-2 small"><i class="bi bi-shield-lock me-1"></i> RBAC Enforced</span>
-          </div>
-          <div class="card-stat-icon bg-info bg-opacity-10 text-info"><i class="bi bi-people-fill"></i></div>
-        </div>
+    </div>
+    <div class="col-6 col-md-4 col-xl-2 mb-3">
+      <div class="card-stat p-3 h-100 d-flex flex-column justify-content-center align-items-center text-center border-success border-start border-4">
+        <span class="text-muted small fw-bold text-uppercase mb-2">Disetujui</span>
+        <h3 class="fw-bold mb-0 text-success fs-3">${setujuCount}</h3>
       </div>
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="card-stat d-flex align-items-center justify-content-between border-warning border-start border-4">
-          <div>
-            <span class="text-muted small fw-bold text-uppercase d-block mb-1">Google Sheets DB</span>
-            <h3 class="fw-bold mb-0 text-warning fs-4 mt-1">Terkoneksi</h3>
-            <span class="badge bg-dark text-warning mt-2 small font-monospace">ID: 1xDG...26DIU</span>
-          </div>
-          <div class="card-stat-icon bg-warning bg-opacity-10 text-warning"><i class="bi bi-cloud-check-fill"></i></div>
-        </div>
+    </div>
+    <div class="col-6 col-md-6 col-xl-3 mb-3">
+      <div class="card-stat p-3 h-100 d-flex flex-column justify-content-center align-items-center text-center border-warning border-start border-4">
+        <span class="text-muted small fw-bold text-uppercase mb-2">Perlu Perbaikan</span>
+        <h3 class="fw-bold mb-0 text-warning fs-3">${perbaikanCount}</h3>
       </div>
-    `;
-  } else if (role === "hukum") {
-    const belumVerif = usulanList.filter(u => u.status === "Draft" || u.status === "Diverifikasi").length;
-    container.innerHTML = `
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="card-stat d-flex align-items-center justify-content-between border-primary border-start border-4">
-          <div>
-            <span class="text-muted small fw-bold text-uppercase d-block mb-1">Total Usulan Masuk</span>
-            <h3 class="fw-bold mb-0 text-primary fs-2">${total}</h3>
-            <span class="badge bg-primary bg-opacity-10 text-primary mt-2 small"><i class="bi bi-folder me-1"></i> Seluruh OPD</span>
-          </div>
-          <div class="card-stat-icon bg-primary bg-opacity-10 text-primary"><i class="bi bi-file-earmark-text"></i></div>
-        </div>
+    </div>
+    <div class="col-12 col-md-6 col-xl-3 mb-3">
+      <div class="card-stat p-3 h-100 d-flex flex-column justify-content-center align-items-center text-center border-danger border-start border-4">
+        <span class="text-muted small fw-bold text-uppercase mb-2">Ditolak</span>
+        <h3 class="fw-bold mb-0 text-danger fs-3">${tolakCount}</h3>
       </div>
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="card-stat d-flex align-items-center justify-content-between border-warning border-start border-4">
-          <div>
-            <span class="text-muted small fw-bold text-uppercase d-block mb-1">Belum Diverifikasi</span>
-            <h3 class="fw-bold mb-0 text-warning fs-2">${belumVerif}</h3>
-            <span class="badge bg-warning bg-opacity-10 text-dark mt-2 small"><i class="bi bi-clock-history me-1"></i> Butuh Verifikasi</span>
-          </div>
-          <div class="card-stat-icon bg-warning bg-opacity-10 text-warning"><i class="bi bi-exclamation-circle-fill"></i></div>
-        </div>
-      </div>
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="card-stat d-flex align-items-center justify-content-between border-info border-start border-4">
-          <div>
-            <span class="text-muted small fw-bold text-uppercase d-block mb-1">Sedang Diproses</span>
-            <h3 class="fw-bold mb-0 text-info fs-2">${prosesCount}</h3>
-            <span class="badge bg-info bg-opacity-10 text-info mt-2 small"><i class="bi bi-gear-wide-connected me-1"></i> Tahap Legislasi</span>
-          </div>
-          <div class="card-stat-icon bg-info bg-opacity-10 text-info"><i class="bi bi-arrow-repeat"></i></div>
-        </div>
-      </div>
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="card-stat d-flex align-items-center justify-content-between border-success border-start border-4">
-          <div>
-            <span class="text-muted small fw-bold text-uppercase d-block mb-1">Selesai Disahkan</span>
-            <h3 class="fw-bold mb-0 text-success fs-2">${selesaiCount}</h3>
-            <span class="badge bg-success bg-opacity-10 text-success mt-2 small"><i class="bi bi-check-circle-fill me-1"></i> Perda / Perbup Jadi</span>
-          </div>
-          <div class="card-stat-icon bg-success bg-opacity-10 text-success"><i class="bi bi-award-fill"></i></div>
-        </div>
-      </div>
-    `;
-  } else if (role === "opd") {
-    const draftCount = filteredList.filter(u => u.status === "Draft").length;
-    const tolakCount = filteredList.filter(u => u.status.includes("Perbaikan") || u.status.includes("Tolak")).length;
-    container.innerHTML = `
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="card-stat d-flex align-items-center justify-content-between border-primary border-start border-4">
-          <div>
-            <span class="text-muted small fw-bold text-uppercase d-block mb-1">Usulan OPD Anda</span>
-            <h3 class="fw-bold mb-0 text-primary fs-2">${total}</h3>
-            <span class="badge bg-primary bg-opacity-10 text-primary mt-2 small text-truncate" style="max-width: 180px;"><i class="bi bi-building me-1"></i> ${currentUser.opd}</span>
-          </div>
-          <div class="card-stat-icon bg-primary bg-opacity-10 text-primary"><i class="bi bi-folder-fill"></i></div>
-        </div>
-      </div>
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="card-stat d-flex align-items-center justify-content-between border-secondary border-start border-4">
-          <div>
-            <span class="text-muted small fw-bold text-uppercase d-block mb-1">Draft / Pengajuan</span>
-            <h3 class="fw-bold mb-0 text-secondary fs-2">${draftCount}</h3>
-            <span class="badge bg-secondary bg-opacity-10 text-secondary mt-2 small"><i class="bi bi-file-earmark me-1"></i> Menunggu Verifikasi</span>
-          </div>
-          <div class="card-stat-icon bg-secondary bg-opacity-10 text-secondary"><i class="bi bi-file-earmark-plus"></i></div>
-        </div>
-      </div>
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="card-stat d-flex align-items-center justify-content-between border-info border-start border-4">
-          <div>
-            <span class="text-muted small fw-bold text-uppercase d-block mb-1">Sedang Diproses</span>
-            <h3 class="fw-bold mb-0 text-info fs-2">${prosesCount}</h3>
-            <span class="badge bg-info bg-opacity-10 text-info mt-2 small"><i class="bi bi-hourglass-split me-1"></i> Dalam Harmonisasi</span>
-          </div>
-          <div class="card-stat-icon bg-info bg-opacity-10 text-info"><i class="bi bi-activity"></i></div>
-        </div>
-      </div>
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="card-stat d-flex align-items-center justify-content-between border-danger border-start border-4">
-          <div>
-            <span class="text-muted small fw-bold text-uppercase d-block mb-1">Perlu Perbaikan</span>
-            <h3 class="fw-bold mb-0 text-danger fs-2">${tolakCount}</h3>
-            <span class="badge bg-danger bg-opacity-10 text-danger mt-2 small"><i class="bi bi-exclamation-triangle me-1"></i> Cek Catatan Revisi</span>
-          </div>
-          <div class="card-stat-icon bg-danger bg-opacity-10 text-danger"><i class="bi bi-x-circle-fill"></i></div>
-        </div>
-      </div>
-    `;
-  } else {
-    const persentase = total > 0 ? Math.round((selesaiCount / total) * 100) : 0;
-    container.innerHTML = `
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="card-stat d-flex align-items-center justify-content-between border-primary border-start border-4">
-          <div>
-            <span class="text-muted small fw-bold text-uppercase d-block mb-1">Total Usulan Regulasi</span>
-            <h3 class="fw-bold mb-0 text-primary fs-2">${total}</h3>
-            <span class="badge bg-primary bg-opacity-10 text-primary mt-2 small"><i class="bi bi-files me-1"></i> Monitoring Eksekutif</span>
-          </div>
-          <div class="card-stat-icon bg-primary bg-opacity-10 text-primary"><i class="bi bi-grid-fill"></i></div>
-        </div>
-      </div>
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="card-stat d-flex align-items-center justify-content-between border-success border-start border-4">
-          <div>
-            <span class="text-muted small fw-bold text-uppercase d-block mb-1">Persentase Penyelesaian</span>
-            <h3 class="fw-bold mb-0 text-success fs-2">${persentase}%</h3>
-            <span class="badge bg-success bg-opacity-10 text-success mt-2 small"><i class="bi bi-graph-up-arrow me-1"></i> Efektivitas Kinerja</span>
-          </div>
-          <div class="card-stat-icon bg-success bg-opacity-10 text-success"><i class="bi bi-percent"></i></div>
-        </div>
-      </div>
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="card-stat d-flex align-items-center justify-content-between border-info border-start border-4">
-          <div>
-            <span class="text-muted small fw-bold text-uppercase d-block mb-1">Perda vs Perkada</span>
-            <h3 class="fw-bold mb-0 text-info fs-4 mt-1">${perdaCount} Perda / ${perkadaCount} Perbup</h3>
-            <span class="badge bg-info bg-opacity-10 text-info mt-2 small"><i class="bi bi-pie-chart me-1"></i> Proporsi Regulasi</span>
-          </div>
-          <div class="card-stat-icon bg-info bg-opacity-10 text-info"><i class="bi bi-pie-chart-fill"></i></div>
-        </div>
-      </div>
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="card-stat d-flex align-items-center justify-content-between border-warning border-start border-4">
-          <div>
-            <span class="text-muted small fw-bold text-uppercase d-block mb-1">Dalam Pembahasan</span>
-            <h3 class="fw-bold mb-0 text-warning fs-2">${prosesCount}</h3>
-            <span class="badge bg-warning bg-opacity-10 text-dark mt-2 small"><i class="bi bi-clock me-1"></i> Tahap Legislasi</span>
-          </div>
-          <div class="card-stat-icon bg-warning bg-opacity-10 text-warning"><i class="bi bi-activity"></i></div>
-        </div>
-      </div>
-    `;
-  }
+    </div>
+  `;
 }
 
 // Global Chart variables to destroy before recreating
@@ -1084,6 +939,17 @@ function applyFilters() {
 /**
  * Toggle input keterangan delegasi
  */
+
+function togglePeraturanLama() {
+  const status = document.getElementById("inp-status").value;
+  const divPeraturanLama = document.getElementById("div-peraturan-lama");
+  if (status === "Baru") {
+    divPeraturanLama.style.display = "none";
+  } else {
+    divPeraturanLama.style.display = "block";
+  }
+}
+
 function toggleDelegasi() {
   const val = document.getElementById("inp-is-delegasi").value;
   const box = document.getElementById("div-delegasi-text");

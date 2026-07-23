@@ -504,13 +504,13 @@
                     <div class="col-12 col-md-4">
                       <label class="form-label fw-bold small">Status Sifat Regulasi <span
                           class="text-danger">*</span></label>
-                      <select id="inp-status" class="form-select" required>
+                      <select id="inp-status" class="form-select" onchange="togglePeraturanLama()" required>
                         <option value="Baru">Baru</option>
                         <option value="Perubahan">Perubahan</option>
                         <option value="Pencabutan">Pencabutan</option>
                       </select>
                     </div>
-                    <div class="col-12">
+                    <div class="col-12" id="div-peraturan-lama" style="display:none;">
                       <label class="form-label fw-bold small">Jika Perubahan/Pencabutan, Sebutkan Nomor dan Judul
                         Peraturan Lama</label>
                       <input type="text" id="inp-peraturan-lama" class="form-control" value="N/A"
@@ -596,7 +596,7 @@
                     <button type="button" class="btn btn-outline-secondary w-100 w-sm-auto order-2 order-sm-1 px-4"
                       onclick="switchPage('page-usulan')">Batal</button>
                     <button type="submit" class="btn btn-primary w-100 w-sm-auto order-1 order-sm-2 px-4 shadow-sm"
-                      id="btnSaveSubmit">Simpan Usulan <i class="bi bi-send ms-1"></i></button>
+                      id="btnSaveSubmit">Submit Usulan <i class="bi bi-send ms-1"></i></button>
                   </div>
                 </form>
               </div>

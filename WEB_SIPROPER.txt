@@ -1,0 +1,16 @@
+﻿WEB SIPROPER
+KET: 
+untuk bagian dashboard memuat usulan opd, sedang diproses, disetujui, perlu perbaikan dan ditolak;
+pilihan usulan baru agar tertera hanya pada tambah usulan;
+Ket:
+tadi sudah mencoba pengajuan usulan, tapi pada super admin tidak muncul
+Ket:
+pada status regulasi usulan untuk baru, diharapkan tidak muncul kolom perubahan atau pencabutan
+Ket:
+untuk diakhir pengisian form, mungkin bisa di ganti menjadi submit, atau ada satu fitur lagi untuk mengirimkan konsep ke admin verifikator pada bagian hukum
+Ket:
+pada dashboard super admin, mungkin bisa dihilangkan menu tambah usulan
+Ket: 
+pada update tahapan proses regulasi mungkin bisa ditambahkan usulan ditolak
+Ket:
+untuk mengirim notifikasi ke wa perangkat daerah pemrakarsa itu seperti apa
