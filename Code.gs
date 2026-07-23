@@ -471,7 +471,11 @@ function uploadFile(base64Data, fileName, mimeType) {
   var decoded = Utilities.base64Decode(base64Data);
   var blob = Utilities.newBlob(decoded, mimeType || "application/pdf", fileName);
   var file = folder.createFile(blob);
-  file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+  try {
+    file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+  } catch (e) {
+    Logger.log("Gagal mengatur sharing (mungkin dibatasi oleh Workspace Admin): " + e.message);
+  }
   return { success: true, fileUrl: file.getUrl() };
 }
 
