@@ -869,11 +869,16 @@ function renderUsulanTable() {
   }
 
   displayList.forEach((item, idx) => {
-    let statusClass = "status-draft";
-    const st = item.status.toLowerCase().replace(/\s+/g, '-');
-    if (st) statusClass = "status-" + st;
+    try {
+      let statusClass = "status-draft";
+      const safeStatus = item.status || "Draft";
+      const safeJenis = item.jenis || "Perkada";
+      const safeTimestamp = item.timestamp || "";
+      
+      const st = safeStatus.toLowerCase().replace(/\s+/g, '-');
+      if (st) statusClass = "status-" + st;
 
-    const shortTimestamp = item.timestamp.split(" ")[0];
+      const shortTimestamp = safeTimestamp ? safeTimestamp.split(" ")[0] : "-";
 
     // Tombol Aksi RBAC
     let actionButtons = `
@@ -904,16 +909,16 @@ function renderUsulanTable() {
           <small class="text-muted d-block text-truncate" style="max-width: 320px;"><i class="bi bi-info-circle me-1"></i> ${item.urgensi}</small>
         </td>
         <td>
-          <span class="badge ${item.jenis.includes('Perda') ? 'bg-primary' : 'bg-info text-dark'} py-1.5 px-2.5">${item.jenis.includes('Perda') ? 'Perda' : 'Perkada'}</span>
+          <span class="badge ${safeJenis.includes('Perda') ? 'bg-primary' : 'bg-info text-dark'} py-1.5 px-2.5">${safeJenis.includes('Perda') ? 'Perda' : 'Perkada'}</span>
           <small class="d-block text-muted mt-1" style="font-size: 0.725rem;">Sifat: ${item.statusRegulasi}</small>
         </td>
         <td>
           <span class="fw-medium d-block text-main">${item.pic}</span>
           <small class="text-muted"><i class="bi bi-calendar-check me-1"></i> ${shortTimestamp}</small>
-          <a href="https://wa.me/62${item.wa.replace(/^0+/, '')}" target="_blank" class="badge bg-success bg-opacity-25 text-success text-decoration-none d-inline-block mt-1"><i class="bi bi-whatsapp me-1"></i> Chat WA</a>
+          <a href="https://wa.me/62${(item.wa || '').replace(/^0+/, '')}" target="_blank" class="badge bg-success bg-opacity-25 text-success text-decoration-none d-inline-block mt-1"><i class="bi bi-whatsapp me-1"></i> Chat WA</a>
         </td>
         <td>
-          <span class="badge-status ${statusClass}">${item.status}</span>
+          <span class="badge-status ${statusClass}">${safeStatus}</span>
         </td>
         <td class="text-center text-nowrap">
           ${actionButtons}
@@ -921,6 +926,9 @@ function renderUsulanTable() {
       </tr>
     `;
     tbody.insertAdjacentHTML("beforeend", tr);
+    } catch (err) {
+      console.error("Error rendering item:", item, err);
+    }
   });
 
   // Re-initialize DataTables
